@@ -42,17 +42,23 @@ async function apiRequest<T>(
     headers['Authorization'] = `Bearer ${token}`;
   }
   
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
-  
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Network error' }));
-    throw new Error(error.message || 'API request failed');
+  try {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      headers,
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'API request failed');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('API Request Error:', error);
+    throw error;
   }
-  
-  return response.json();
 }
 
 // ==========================================
@@ -67,18 +73,28 @@ export const authApi = {
     });
   },
   
-  login: async (credentials: LoginCredentials): Promise<ApiResponse<Admin>> => {
-    const response = await apiRequest<Admin>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
-    
-    if (response.success && response.token) {
-      tokenManager.setToken(response.token);
-    }
-    
-    return response;
-  },
+ login: async (credentials: LoginCredentials): Promise<ApiResponse<Admin>> => {
+  const response = await apiRequest<Admin>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(credentials),
+  });
+  
+  console.log('Login API Response:', response);
+  
+  // Store token
+  if (response.success && response.token) {
+    console.log('✅ Storing token');
+    tokenManager.setToken(response.token);
+  }
+  
+  // ✅ FIX: Backend returns 'admin' instead of 'data'
+  // Move admin to data field
+  if ((response as any).admin && !response.data) {
+    response.data = (response as any).admin;
+  }
+  
+  return response;
+},
   
   logout: async (): Promise<ApiResponse<null>> => {
     const response = await apiRequest<null>('/auth/logout', {

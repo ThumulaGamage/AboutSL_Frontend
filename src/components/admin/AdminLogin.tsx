@@ -20,18 +20,44 @@ export function AdminLogin() {
     setError('');
     setIsLoading(true);
 
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    console.log('📧 Login form submitted');
+    console.log('  Email:', email);
+    console.log('  Password length:', password.length);
 
-    const success = login(email, password);
-    
-    if (success) {
-      navigate('/admin/dashboard');
-    } else {
-      setError('Invalid email or password. Please try again.');
+    try {
+      console.log('⏳ Calling login function...');
+      const success = await login(email, password);
+      
+      console.log('📊 Login result:', success);
+      
+      if (success) {
+        console.log('✅ Login successful!');
+        console.log('🚀 Navigating to dashboard...');
+        
+        // Use window.location for a hard redirect as fallback
+        // This ensures navigation happens even if React Router has issues
+        setTimeout(() => {
+          console.log('🔄 Executing navigation...');
+          navigate('/admin/dashboard', { replace: true });
+          
+          // Fallback: if navigate doesn't work after 500ms, use window.location
+          setTimeout(() => {
+            if (window.location.pathname === '/admin') {
+              console.log('⚠️ React Router navigation failed, using window.location');
+              window.location.href = '/admin/dashboard';
+            }
+          }, 500);
+        }, 200);
+      } else {
+        console.log('❌ Login failed - invalid credentials');
+        setError('Invalid email or password. Please try again.');
+      }
+    } catch (error) {
+      console.error('❌ Login error:', error);
+      setError('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (
@@ -75,6 +101,8 @@ export function AdminLogin() {
                   placeholder="admin@aboutsl.com"
                   className="pl-10"
                   required
+                  disabled={isLoading}
+                  autoComplete="email"
                 />
               </div>
             </div>
@@ -91,11 +119,15 @@ export function AdminLogin() {
                   placeholder="Enter your password"
                   className="pl-10 pr-10"
                   required
+                  disabled={isLoading}
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  disabled={isLoading}
+                  tabIndex={-1}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -108,15 +140,40 @@ export function AdminLogin() {
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
               disabled={isLoading}
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <span className="animate-spin">⏳</span>
+                  Signing in...
+                </span>
+              ) : (
+                'Sign In'
+              )}
             </Button>
           </form>
 
           {/* Demo Credentials */}
           <div className="mt-6 p-4 rounded-lg bg-muted">
             <p className="text-sm text-muted-foreground mb-2">Demo credentials:</p>
-            <p className="text-sm font-mono text-foreground">admin@aboutsl.com</p>
-            <p className="text-sm font-mono text-foreground">admin123</p>
+            <div className="space-y-1">
+              <p className="text-sm font-mono text-foreground">admin@aboutsl.com</p>
+              <p className="text-sm font-mono text-foreground">admin123</p>
+            </div>
+          </div>
+
+          {/* Quick Fill Button */}
+          <div className="mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setEmail('admin@aboutsl.com');
+                setPassword('admin123');
+              }}
+              disabled={isLoading}
+            >
+              Auto-fill Demo Credentials
+            </Button>
           </div>
         </div>
       </div>
