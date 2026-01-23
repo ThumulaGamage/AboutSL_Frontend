@@ -23,7 +23,7 @@ export interface VisitInfo {
 }
 
 export interface Destination {
-  id: string;
+  id: number;
   name: string;
   slug: string;
   region: string;

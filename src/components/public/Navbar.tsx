@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Compass, Home, MapPin, Hotel, Info, Mail, Map } from 'lucide-react';
+import { Menu, X, Home, MapPin, Hotel, Info, Mail, Map } from 'lucide-react';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import logoGif from '@/assets/aboutsl-logo.gif';
 
 const navLinks = [
   { path: '/', label: 'Home', icon: Home },
@@ -36,21 +38,14 @@ export function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300 ${
-              showTransparent 
-                ? 'bg-white/20 backdrop-blur-sm group-hover:bg-white/30' 
-                : 'bg-primary group-hover:bg-primary/90'
-            }`}>
-              <Compass className={`w-6 h-6 transition-colors ${
-                showTransparent ? 'text-white' : 'text-primary-foreground'
-              }`} />
-            </div>
-            <span className={`font-display text-2xl font-bold transition-colors ${
-              showTransparent ? 'text-white' : 'text-foreground'
-            }`}>
-              About<span className="text-secondary">SL</span>
-            </span>
+          <Link to="/" className="flex items-center gap-2 group">
+            <img 
+              src={logoGif} 
+              alt="AboutSL" 
+              className={`h-12 w-auto transition-all duration-300 ${
+                showTransparent ? 'brightness-0 invert' : ''
+              }`}
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -80,20 +75,28 @@ export function Navbar() {
                 </Link>
               );
             })}
+
+            {/* Theme Toggle */}
+            <div className="ml-2 pl-2 border-l border-border/50">
+              <ThemeToggle showTransparent={showTransparent} />
+            </div>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className={`md:hidden p-2.5 rounded-lg transition-colors ${
-              showTransparent 
-                ? 'text-white hover:bg-white/10' 
-                : 'text-foreground hover:bg-muted'
-            }`}
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle menu"
-          >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Mobile: Theme Toggle + Menu Button */}
+          <div className="md:hidden flex items-center gap-1">
+            <ThemeToggle showTransparent={showTransparent} />
+            <button
+              className={`p-2.5 rounded-lg transition-colors ${
+                showTransparent 
+                  ? 'text-white hover:bg-white/10' 
+                  : 'text-foreground hover:bg-muted'
+              }`}
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle menu"
+            >
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}

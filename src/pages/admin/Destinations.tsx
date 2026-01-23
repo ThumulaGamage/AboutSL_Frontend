@@ -4,7 +4,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { DataTable } from '@/components/admin/DataTable';
 import { DestinationForm } from '@/components/admin/DestinationForm';
 import { useData } from '@/contexts/DataContext';
-import { Destination } from '@/data/sampleData';
+import { Destination } from '@/types';
 
 export function AdminDestinations() {
   const { destinations, addDestination, updateDestination, deleteDestination, toggleDestinationStatus } = useData();
@@ -25,7 +25,7 @@ export function AdminDestinations() {
       render: (value: string, item: Destination) => (
         <div>
           <div className="font-medium text-foreground">{value}</div>
-          <div className="text-xs text-muted-foreground truncate max-w-[200px]">{item.quickSummary}</div>
+          <div className="text-xs text-muted-foreground truncate max-w-[200px]">{item.overview?.description}</div>
         </div>
       ),
     },
@@ -64,13 +64,23 @@ export function AdminDestinations() {
     setIsFormOpen(true);
   };
 
-  const handleSave = (destination: Destination) => {
-    if (editingDestination) {
-      updateDestination(destination.id, destination);
+ const handleSave = async (destination: Partial<Destination>) => {
+  try {
+    if (editingDestination?.id) {
+      // Use the editingDestination.id instead of destination.id
+      await updateDestination(editingDestination.id, destination);
     } else {
-      addDestination(destination);
+      await addDestination(destination);
     }
-  };
+    
+    // Close form and reset on success
+    setIsFormOpen(false);
+    setEditingDestination(null);
+  } catch (error) {
+    // Error is already handled by DataContext with toast
+    console.error('Save error:', error);
+  }
+};
 
   return (
     <AdminLayout>

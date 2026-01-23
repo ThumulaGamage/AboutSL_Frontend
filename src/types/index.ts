@@ -143,6 +143,19 @@ export interface Hotel {
     email: string;
     website?: string;
   };
+  nearbyDestinations?: Array<{
+    destinationId: number;
+    destinationName: string;
+    distance: number;
+    unit: string;
+  }>;
+  nearbyDestinationsDetails?: Array<{
+    destinationId: number;
+    destinationName: string;
+    distance: number;
+    unit: string;
+    destination: Destination;
+  }>;
   metaDescription?: string;
   keywords?: string[];
   status: 'active' | 'inactive' | 'draft';

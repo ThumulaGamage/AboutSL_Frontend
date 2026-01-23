@@ -1,29 +1,36 @@
 import { X, MapPin } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useData } from '@/contexts/DataContext';
+import sriLankaMap from '@/assets/srilanka-map.png';
 
 interface MapModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectDestination: (id: string) => void;
+  onSelectDestination: (id: number) => void;
 }
 
 export function MapModal({ isOpen, onClose, onSelectDestination }: MapModalProps) {
   const { destinations } = useData();
-  const activeDestinations = destinations.filter(d => d.status === 'active');
+  const activeDestinations = destinations.filter(d => 
+    d.status === 'active' && 
+    d.location?.coordinates?.lat && 
+    d.location?.coordinates?.lng
+  );
 
-  // Sri Lanka map positions (simplified)
+  // Sri Lanka map positions
   const getPosition = (coordinates: { lat: number; lng: number }) => {
-    // Map coordinates to percentage positions on the SVG
     const minLat = 5.9;
-    const maxLat = 9.8;
+    const maxLat = 9.85;
     const minLng = 79.5;
     const maxLng = 81.9;
     
     const x = ((coordinates.lng - minLng) / (maxLng - minLng)) * 100;
     const y = ((maxLat - coordinates.lat) / (maxLat - minLat)) * 100;
     
-    return { x: Math.max(10, Math.min(90, x)), y: Math.max(10, Math.min(90, y)) };
+    return { 
+      left: `${Math.max(5, Math.min(95, x))}%`, 
+      top: `${Math.max(5, Math.min(95, y))}%` 
+    };
   };
 
   return (
@@ -43,78 +50,52 @@ export function MapModal({ isOpen, onClose, onSelectDestination }: MapModalProps
         </div>
 
         {/* Map Container */}
-        <div className="relative flex-1 h-full bg-primary/5">
-          {/* Sri Lanka Outline (Simplified SVG) */}
-          <svg
-            viewBox="0 0 100 120"
-            className="w-full h-full"
-            style={{ maxHeight: 'calc(80vh - 80px)' }}
-          >
-            {/* Island Shape */}
-            <path
-              d="M 50 5 
-                 C 60 8, 75 15, 78 25
-                 C 82 35, 85 45, 82 55
-                 C 80 65, 75 75, 70 85
-                 C 65 95, 55 105, 50 110
-                 C 45 105, 35 95, 30 85
-                 C 25 75, 20 65, 18 55
-                 C 15 45, 18 35, 22 25
-                 C 25 15, 40 8, 50 5"
-              fill="hsl(var(--primary) / 0.15)"
-              stroke="hsl(var(--primary))"
-              strokeWidth="1"
+        <div className="relative flex-1 h-full p-6 flex items-center justify-center">
+          <div className="relative" style={{ maxWidth: '400px', width: '100%' }}>
+            <img 
+              src={sriLankaMap} 
+              alt="Sri Lanka Map" 
+              className="w-full h-auto opacity-90"
             />
-
+            
             {/* Destination Markers */}
             {activeDestinations.map((dest) => {
-              const pos = getPosition(dest.coordinates);
+              if (!dest.location?.coordinates?.lat || !dest.location?.coordinates?.lng) return null;
+              
+              const pos = getPosition({
+                lat: dest.location.coordinates.lat,
+                lng: dest.location.coordinates.lng
+              });
+              
               return (
-                <g
+                <button
                   key={dest.id}
-                  className="cursor-pointer"
+                  className="absolute transform -translate-x-1/2 -translate-y-1/2 group z-10"
+                  style={{ left: pos.left, top: pos.top }}
                   onClick={() => {
                     onSelectDestination(dest.id);
                     onClose();
                   }}
                 >
-                  {/* Marker Pin */}
-                  <circle
-                    cx={pos.x}
-                    cy={pos.y}
-                    r="3"
-                    fill="hsl(var(--accent))"
-                    className="animate-pulse"
-                  />
-                  <circle
-                    cx={pos.x}
-                    cy={pos.y}
-                    r="5"
-                    fill="none"
-                    stroke="hsl(var(--accent))"
-                    strokeWidth="1"
-                    opacity="0.5"
-                  />
+                  {/* Pulse Ring */}
+                  <span className="absolute inset-0 w-6 h-6 -m-1 rounded-full bg-secondary/30 animate-ping" />
                   
+                  {/* Marker */}
+                  <span className="relative flex items-center justify-center w-3 h-3 rounded-full bg-secondary shadow-lg border-2 border-white group-hover:scale-150 transition-transform" />
+
                   {/* Label */}
-                  <text
-                    x={pos.x + 8}
-                    y={pos.y + 1}
-                    fontSize="4"
-                    fill="hsl(var(--foreground))"
-                    className="font-sans pointer-events-none"
-                  >
+                  <span className="absolute left-5 top-1/2 -translate-y-1/2 whitespace-nowrap bg-card/95 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium text-foreground opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-border shadow-sm">
                     {dest.name}
-                  </text>
-                </g>
+                  </span>
+                </button>
               );
             })}
-          </svg>
+          </div>
 
           {/* Legend */}
-          <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm rounded-lg p-4 shadow-md">
-            <h4 className="font-semibold text-foreground mb-2 text-sm">Destinations</h4>
-            <div className="space-y-2">
+          <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm rounded-lg p-4 shadow-md border border-border">
+            <h4 className="font-display font-semibold text-foreground mb-2 text-sm">Destinations</h4>
+            <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
               {activeDestinations.map((dest) => (
                 <button
                   key={dest.id}
@@ -124,7 +105,7 @@ export function MapModal({ isOpen, onClose, onSelectDestination }: MapModalProps
                   }}
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full text-left"
                 >
-                  <MapPin className="w-4 h-4 text-accent" />
+                  <MapPin className="w-4 h-4 text-secondary" />
                   {dest.name}
                 </button>
               ))}

@@ -69,29 +69,29 @@ export function AboutSection() {
           </div>
         </div>
 
-        {/* About Content */}
-        <div className="max-w-4xl mx-auto text-center mb-20">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-            <Globe className="w-4 h-4" />
-            About Us
-          </div>
+        {/* About Content - Bold Editorial */}
+        <div className="max-w-5xl mb-20">
+          <p className="text-primary font-semibold uppercase tracking-widest text-sm mb-4">✦ About Us</p>
           
-          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8">
-            Your Gateway to the
-            <span className="block text-gradient mt-2">Pearl of the Indian Ocean</span>
+          <h2 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1] mb-8">
+            YOUR GATEWAY TO THE
+            <span className="block text-muted-foreground/40">PEARL OF THE</span>
+            <span className="block">INDIAN OCEAN.</span>
           </h2>
           
-          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-6">
-            AboutSL is your comprehensive guide to exploring Sri Lanka - a land where ancient history meets 
-            natural beauty. We're dedicated to helping travelers discover the island's rich heritage, 
-            stunning landscapes, diverse wildlife, and warm hospitality.
-          </p>
-          
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            From ancient UNESCO World Heritage sites to pristine tropical beaches, from misty mountain 
-            tea plantations to thrilling wildlife safaris, Sri Lanka offers an incredible diversity of 
-            experiences in a compact island setting.
-          </p>
+          <div className="grid md:grid-cols-2 gap-8 mt-12">
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              AboutSL is your comprehensive guide to exploring Sri Lanka - a land where ancient history meets 
+              natural beauty. We're dedicated to helping travelers discover the island's rich heritage, 
+              stunning landscapes, diverse wildlife, and warm hospitality.
+            </p>
+            
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              From ancient UNESCO World Heritage sites to pristine tropical beaches, from misty mountain 
+              tea plantations to thrilling wildlife safaris, Sri Lanka offers an incredible diversity of 
+              experiences in a compact island setting.
+            </p>
+          </div>
         </div>
 
         {/* Quick Highlights */}

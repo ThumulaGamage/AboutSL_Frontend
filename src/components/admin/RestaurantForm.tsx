@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import { Restaurant } from '@/data/sampleData';
+import { Restaurant } from '@/types';
 
 interface RestaurantFormProps {
   restaurant?: Restaurant | null;
@@ -20,11 +20,11 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
     location: '',
     cuisine: '',
     specialty: '',
-    averagePrice: 15,
+    price: 15,
     heroImage: '',
     photoGallery: [''],
     quickSummary: '',
-    description: '',
+    fullDescription: '',
     rating: 4.5,
     reviewCount: 0,
     status: 'active',
@@ -41,11 +41,11 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
         location: '',
         cuisine: '',
         specialty: '',
-        averagePrice: 15,
+        price: 15,
         heroImage: '',
         photoGallery: [''],
         quickSummary: '',
-        description: '',
+        fullDescription: '',
         rating: 4.5,
         reviewCount: 0,
         status: 'active',
@@ -60,8 +60,10 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
     if (!formData.name?.trim()) newErrors.name = 'Name is required';
     if (!formData.location?.trim()) newErrors.location = 'Location is required';
     if (!formData.cuisine?.trim()) newErrors.cuisine = 'Cuisine type is required';
+    if (!formData.specialty?.trim()) newErrors.specialty = 'Specialty is required';
+    if (!formData.price || formData.price <= 0) newErrors.price = 'Valid price is required';
     if (!formData.heroImage?.trim()) newErrors.heroImage = 'Hero image URL is required';
-    if (!formData.quickSummary?.trim()) newErrors.quickSummary = 'Summary is required';
+    if (!formData.fullDescription?.trim()) newErrors.fullDescription = 'Full description is required';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -72,12 +74,16 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
     
     if (!validate()) return;
 
-    const id = restaurant?.id || `r${Date.now()}`;
+    const id = restaurant?.id || Date.now();
 
     onSave({
       ...formData,
       id,
+      slug: formData.name?.toLowerCase().replace(/\s+/g, '-') || '',
       photoGallery: formData.photoGallery?.filter(url => url.trim()) || [],
+      rating: formData.rating || 4.5,
+      reviewCount: formData.reviewCount || 0,
+      status: formData.status || 'active',
     } as Restaurant);
 
     onClose();
@@ -146,22 +152,26 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Specialty</label>
+                <label className="text-sm font-medium text-foreground">Specialty *</label>
                 <Input
                   value={formData.specialty || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, specialty: e.target.value }))}
                   placeholder="e.g., Rice & Curry"
+                  className={errors.specialty ? 'border-destructive' : ''}
                 />
+                {errors.specialty && <p className="text-xs text-destructive">{errors.specialty}</p>}
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Average Price ($)</label>
                 <Input
                   type="number"
-                  value={formData.averagePrice || 15}
-                  onChange={(e) => setFormData(prev => ({ ...prev, averagePrice: parseInt(e.target.value) || 0 }))}
+                  value={formData.price || 15}
+                  onChange={(e) => setFormData(prev => ({ ...prev, price: parseInt(e.target.value) || 0 }))}
                   min={0}
+                  className={errors.price ? 'border-destructive' : ''}
                 />
+                {errors.price && <p className="text-xs text-destructive">{errors.price}</p>}
               </div>
             </div>
 
@@ -244,13 +254,15 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Full Description</label>
+              <label className="text-sm font-medium text-foreground">Full Description *</label>
               <Textarea
-                value={formData.description || ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                value={formData.fullDescription || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, fullDescription: e.target.value }))}
                 placeholder="Detailed description of the restaurant..."
                 rows={4}
+                className={errors.fullDescription ? 'border-destructive' : ''}
               />
+              {errors.fullDescription && <p className="text-xs text-destructive">{errors.fullDescription}</p>}
             </div>
           </div>
 

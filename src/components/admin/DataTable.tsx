@@ -34,8 +34,8 @@ interface DataTableProps {
   columns: Column[];
   onAdd: () => void;
   onEdit: (item: any) => void;
-  onDelete: (id: string) => void;
-  onToggleStatus: (id: string) => void;
+  onDelete: (id: number) => void;
+  onToggleStatus: (id: number) => void;
   searchPlaceholder?: string;
 }
 
@@ -50,7 +50,7 @@ export function DataTable({
   searchPlaceholder = 'Search...',
 }: DataTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const filteredData = data.filter((item) =>
     Object.values(item).some((value) =>

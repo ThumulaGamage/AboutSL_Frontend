@@ -4,7 +4,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { DataTable } from '@/components/admin/DataTable';
 import { RestaurantForm } from '@/components/admin/RestaurantForm';
 import { useData } from '@/contexts/DataContext';
-import { Restaurant } from '@/data/sampleData';
+import { Restaurant } from '@/types';
 
 export function AdminRestaurants() {
   const { restaurants, addRestaurant, updateRestaurant, deleteRestaurant, toggleRestaurantStatus } = useData();
@@ -43,7 +43,7 @@ export function AdminRestaurants() {
       label: 'Location',
     },
     {
-      key: 'averagePrice',
+      key: 'price',
       label: 'Avg. Price',
       render: (value: number) => (
         <div className="flex items-center gap-1">

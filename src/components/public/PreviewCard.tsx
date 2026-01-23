@@ -1,5 +1,6 @@
 import { MapPin, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import { Destination, Hotel, Restaurant } from '@/data/sampleData';
 
 interface PreviewCardProps {
@@ -10,13 +11,15 @@ interface PreviewCardProps {
 }
 
 export function PreviewCard({ item, type, onViewDetails, index }: PreviewCardProps) {
+  const navigate = useNavigate();
+
   const getSubtitle = () => {
     if (type === 'destination') {
       return (item as Destination).region;
     } else if (type === 'hotel') {
-      return (item as Hotel).location;
+      return (item as Hotel).location?.region || (item as Hotel).location || 'Sri Lanka';
     } else {
-      return (item as Restaurant).location;
+      return (item as Restaurant).location || 'Sri Lanka';
     }
   };
 
@@ -32,9 +35,14 @@ export function PreviewCard({ item, type, onViewDetails, index }: PreviewCardPro
 
   const getPrice = () => {
     if (type === 'hotel') {
-      return `$${(item as Hotel).pricePerNight}/night`;
+      const hotel = item as Hotel;
+      const currency = hotel.currency || '$';
+      const price = hotel.pricePerNight || hotel.price;
+      return price ? `${currency}${price}/night` : null;
     } else if (type === 'restaurant') {
-      return `$${(item as Restaurant).averagePrice} avg`;
+      const restaurant = item as Restaurant;
+      const price = restaurant.averagePrice;
+      return price ? `$${price} avg` : null;
     }
     return null;
   };
@@ -42,17 +50,34 @@ export function PreviewCard({ item, type, onViewDetails, index }: PreviewCardPro
   const getHighlights = () => {
     if (type === 'destination') {
       const dest = item as Destination;
+      if (!dest.highlights || !Array.isArray(dest.highlights)) return [];
       return dest.highlights.slice(0, 3).map(h => h.title);
     } else if (type === 'hotel') {
-      return (item as Hotel).amenities.slice(0, 3);
+      const hotel = item as Hotel;
+      if (!hotel.amenities || !Array.isArray(hotel.amenities)) return [];
+      return hotel.amenities.slice(0, 3);
     } else {
-      return [(item as Restaurant).specialty];
+      const restaurant = item as Restaurant;
+      return restaurant.specialty ? [restaurant.specialty] : [];
     }
   };
 
+  const handleClick = () => {
+    if (type === 'destination') {
+      navigate(`/destinations/${item.id}`);
+    } else if (type === 'hotel') {
+      navigate(`/stay-eat/hotels/${item.id}`);
+    } else if (type === 'restaurant') {
+      navigate(`/stay-eat/restaurants/${item.id}`);
+    }
+  };
+
+  const highlights = getHighlights();
+
   return (
     <div 
-      className="group bg-card rounded-xl overflow-hidden shadow-card hover-lift opacity-0 animate-fade-in-up"
+      onClick={handleClick}
+      className="group bg-card rounded-xl overflow-hidden shadow-card hover-lift opacity-0 animate-fade-in-up cursor-pointer"
       style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
     >
       {/* Image Container */}
@@ -95,27 +120,33 @@ export function PreviewCard({ item, type, onViewDetails, index }: PreviewCardPro
           </div>
         </div>
 
-
         {/* Summary */}
-        <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-          {item.quickSummary}
-        </p>
+        {item.quickSummary && (
+          <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+            {item.quickSummary}
+          </p>
+        )}
 
         {/* Highlights */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {getHighlights().map((highlight, i) => (
-            <span 
-              key={i}
-              className="px-2 py-1 text-xs rounded-md bg-muted text-muted-foreground"
-            >
-              {highlight}
-            </span>
-          ))}
-        </div>
+        {highlights.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {highlights.map((highlight, i) => (
+              <span 
+                key={i}
+                className="px-2 py-1 text-xs rounded-md bg-muted text-muted-foreground"
+              >
+                {highlight}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* CTA Button */}
         <Button 
-          onClick={onViewDetails}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleClick();
+          }}
           className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           View Full Details

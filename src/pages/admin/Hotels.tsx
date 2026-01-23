@@ -4,7 +4,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { DataTable } from '@/components/admin/DataTable';
 import { HotelForm } from '@/components/admin/HotelForm';
 import { useData } from '@/contexts/DataContext';
-import { Hotel } from '@/data/sampleData';
+import { Hotel } from '@/types';
 
 export function AdminHotels() {
   const { hotels, addHotel, updateHotel, deleteHotel, toggleHotelStatus } = useData();
@@ -43,7 +43,7 @@ export function AdminHotels() {
       label: 'Location',
     },
     {
-      key: 'pricePerNight',
+      key: 'price',
       label: 'Price',
       render: (value: number) => (
         <div className="flex items-center gap-1">
@@ -74,13 +74,19 @@ export function AdminHotels() {
     setIsFormOpen(true);
   };
 
-  const handleSave = (hotel: Hotel) => {
-    if (editingHotel) {
-      updateHotel(hotel.id, hotel);
+const handleSave = async (hotel: Partial<Hotel>) => {
+  try {
+    if (editingHotel?.id) {
+      await updateHotel(editingHotel.id, hotel);
     } else {
-      addHotel(hotel);
+      await addHotel(hotel);
     }
-  };
+    setIsFormOpen(false);
+    setEditingHotel(null);
+  } catch (error) {
+    console.error('Save error:', error);
+  }
+};
 
   return (
     <AdminLayout>

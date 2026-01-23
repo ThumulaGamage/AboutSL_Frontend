@@ -2,19 +2,49 @@ import { MapPin, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useData } from '@/contexts/DataContext';
 import { useNavigate } from 'react-router-dom';
-import { Destination, Hotel } from '@/data/sampleData';
+import { Destination, Hotel } from '@/types';
 
 interface TopRatedCardProps {
   item: Destination | Hotel;
   type: 'destination' | 'hotel';
-  onClick: () => void;
   index: number;
 }
 
-function TopRatedCard({ item, type, onClick, index }: TopRatedCardProps) {
+function TopRatedCard({ item, type, index }: TopRatedCardProps) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (type === 'destination') {
+      navigate(`/destinations/${item.id}`);
+    } else {
+      navigate(`/stay-eat/hotels/${item.id}`);
+    }
+  };
+
+  // Helper functions for type-safe access
+  const getDescription = () => {
+    if (type === 'destination') {
+      const dest = item as Destination;
+      return dest.quickSummary || dest.overview?.description || dest.fullDescription?.slice(0, 100);
+    } else {
+      const hotel = item as Hotel;
+      return hotel.quickSummary || hotel.overview?.description || hotel.fullDescription?.slice(0, 100);
+    }
+  };
+
+  const getPrice = () => {
+    if (type === 'hotel') {
+      const hotel = item as Hotel;
+      const currency = hotel.currency || '$';
+      const price = hotel.price || hotel.pricePerNight;
+      return price ? `${currency}${price}` : null;
+    }
+    return null;
+  };
+
   return (
     <div 
-      onClick={onClick}
+      onClick={handleClick}
       className="group cursor-pointer card-modern relative"
       style={{ animationDelay: `${index * 100}ms` }}
     >
@@ -29,10 +59,9 @@ function TopRatedCard({ item, type, onClick, index }: TopRatedCardProps) {
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
         
-
         {/* Category Badge */}
         <div className="absolute top-4 left-4">
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/90 text-foreground backdrop-blur-sm">
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/90 text-foreground backdrop-blur-sm capitalize">
             {type === 'destination' ? (item as Destination).category : (item as Hotel).category}
           </span>
         </div>
@@ -44,7 +73,10 @@ function TopRatedCard({ item, type, onClick, index }: TopRatedCardProps) {
           </h3>
           <div className="flex items-center gap-1.5 text-white/80 text-sm">
             <MapPin className="w-3.5 h-3.5" />
-            {type === 'destination' ? (item as Destination).region : (item as Hotel).location}
+            {type === 'destination' 
+              ? (item as Destination).region 
+              : (item as Hotel).location?.region || 'Sri Lanka'
+            }
           </div>
         </div>
       </div>
@@ -52,13 +84,13 @@ function TopRatedCard({ item, type, onClick, index }: TopRatedCardProps) {
       {/* Content */}
       <div className="p-5">
         <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2 mb-4">
-          {item.quickSummary}
+          {getDescription()}
         </p>
         
         <div className="flex items-center justify-between">
-          {type === 'hotel' && (
+          {type === 'hotel' && getPrice() && (
             <div className="text-lg font-bold text-primary">
-              ${(item as Hotel).pricePerNight}
+              {getPrice()}
               <span className="text-sm text-muted-foreground font-normal">/night</span>
             </div>
           )}
@@ -80,11 +112,7 @@ function TopRatedCard({ item, type, onClick, index }: TopRatedCardProps) {
   );
 }
 
-interface TopRatedSectionProps {
-  onSelectItem: (item: Destination | Hotel, type: 'destination' | 'hotel') => void;
-}
-
-export function TopRatedSection({ onSelectItem }: TopRatedSectionProps) {
+export function TopRatedSection() {
   const { destinations, hotels } = useData();
   const navigate = useNavigate();
 
@@ -97,33 +125,30 @@ export function TopRatedSection({ onSelectItem }: TopRatedSectionProps) {
     .slice(0, 4);
 
   return (
-    <div className="space-y-24">
-      {/* Top Destinations */}
+    <div className="space-y-32">
+      {/* Top Destinations - Editorial Style */}
       <section className="relative">
-        {/* Background Decoration */}
-        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-primary/5 blur-3xl" />
-        
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-              <Sparkles className="w-4 h-4" />
-              Featured Destinations
-            </div>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-3">
-              Featured <span className="text-gradient">Destinations</span>
+            <p className="text-primary font-semibold uppercase tracking-widest text-sm mb-4">✦ Explore Places</p>
+            <h2 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1]">
+              THE PLACES
+              <span className="block text-muted-foreground/40">TO BE.</span>
             </h2>
-            <p className="text-muted-foreground text-lg max-w-xl">
-              Discover Sri Lanka's most loved places, handpicked by thousands of travelers
-            </p>
           </div>
-          <Button 
-            variant="outline" 
-            className="hidden md:flex gap-2 border-primary/30 hover:bg-primary hover:text-primary-foreground transition-all group"
-            onClick={() => navigate('/destinations')}
-          >
-            View All Destinations 
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
+          <div className="max-w-md">
+            <p className="text-muted-foreground text-lg mb-4">
+              Discover Sri Lanka's most breathtaking destinations, from ancient ruins to pristine beaches and misty highlands.
+            </p>
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-foreground hover:text-primary font-semibold uppercase tracking-wider text-sm group"
+              onClick={() => navigate('/destinations')}
+            >
+              Explore All Places
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" />
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -136,7 +161,6 @@ export function TopRatedSection({ onSelectItem }: TopRatedSectionProps) {
               <TopRatedCard 
                 item={dest} 
                 type="destination" 
-                onClick={() => onSelectItem(dest, 'destination')}
                 index={index}
               />
             </div>
@@ -153,32 +177,29 @@ export function TopRatedSection({ onSelectItem }: TopRatedSectionProps) {
         </div>
       </section>
 
-      {/* Top Hotels & Stays */}
+      {/* Top Hotels & Stays - Editorial Style */}
       <section className="relative">
-        {/* Background Decoration */}
-        <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-secondary/10 blur-3xl" />
-        
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 text-secondary text-sm font-medium mb-4">
-              <Sparkles className="w-4 h-4" />
-              Premium Stays
-            </div>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-3">
-              Featured <span className="text-gradient">Hotels & Stays</span>
+            <p className="text-secondary font-semibold uppercase tracking-widest text-sm mb-4">✦ Where to Stay</p>
+            <h2 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1]">
+              THE ART OF
+              <span className="block text-muted-foreground/40">STAYING.</span>
             </h2>
-            <p className="text-muted-foreground text-lg max-w-xl">
-              Premium accommodations for an unforgettable journey through paradise
-            </p>
           </div>
-          <Button 
-            variant="outline" 
-            className="hidden md:flex gap-2 border-secondary/30 hover:bg-secondary hover:text-secondary-foreground transition-all group"
-            onClick={() => navigate('/stay-eat')}
-          >
-            View All Stays 
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
+          <div className="max-w-md">
+            <p className="text-muted-foreground text-lg mb-4">
+              Experience luxury and comfort in handpicked accommodations, from boutique hotels to beachfront resorts.
+            </p>
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-foreground hover:text-secondary font-semibold uppercase tracking-wider text-sm group"
+              onClick={() => navigate('/stay-eat')}
+            >
+              View All Stays
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" />
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -191,7 +212,6 @@ export function TopRatedSection({ onSelectItem }: TopRatedSectionProps) {
               <TopRatedCard 
                 item={hotel} 
                 type="hotel" 
-                onClick={() => onSelectItem(hotel, 'hotel')}
                 index={index}
               />
             </div>
