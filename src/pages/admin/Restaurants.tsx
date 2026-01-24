@@ -41,6 +41,11 @@ export function AdminRestaurants() {
     {
       key: 'location',
       label: 'Location',
+      render: (value: any) => (
+        <span className="text-muted-foreground">
+          {value?.region || 'N/A'}
+        </span>
+      ),
     },
     {
       key: 'price',
@@ -74,11 +79,17 @@ export function AdminRestaurants() {
     setIsFormOpen(true);
   };
 
-  const handleSave = (restaurant: Restaurant) => {
-    if (editingRestaurant) {
-      updateRestaurant(restaurant.id, restaurant);
-    } else {
-      addRestaurant(restaurant);
+  const handleSave = async (restaurant: Partial<Restaurant>) => {
+    try {
+      if (editingRestaurant?.id) {
+        await updateRestaurant(editingRestaurant.id, restaurant);
+      } else {
+        await addRestaurant(restaurant);
+      }
+      setIsFormOpen(false);
+      setEditingRestaurant(null);
+    } catch (error) {
+      console.error('Save error:', error);
     }
   };
 

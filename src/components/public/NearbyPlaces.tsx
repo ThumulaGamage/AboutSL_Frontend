@@ -3,21 +3,20 @@ import { Destination, Hotel as HotelType, Restaurant } from '@/types';
 
 interface NearbyPlacesProps {
   destination: Destination & {
-    nearbyHotels?: HotelType[];
-    nearbyRestaurants?: Restaurant[];
+    nearbyHotels?: (HotelType & { distanceToDestination?: number; distanceUnit?: string })[];
+    nearbyRestaurants?: (Restaurant & { distanceToDestination?: number; distanceUnit?: string })[];
   };
   onSelectHotel: (hotel: HotelType) => void;
   onSelectRestaurant: (restaurant: Restaurant) => void;
 }
 
 export function NearbyPlaces({ destination, onSelectHotel, onSelectRestaurant }: NearbyPlacesProps) {
-  // Get nearby places from the destination object (populated by backend)
-  const nearbyHotels = (destination.nearbyHotels || []).filter(h => h.status === 'active');
-  const nearbyRestaurants = (destination.nearbyRestaurants || []).filter(r => r.status === 'active');
+  const nearbyHotels = destination.nearbyHotels || [];
+  const nearbyRestaurants = destination.nearbyRestaurants || [];
 
   if (nearbyHotels.length === 0 && nearbyRestaurants.length === 0) {
     return (
-      <div className="text-center py-8 bg-muted/50 rounded-xl">
+      <div className="text-center py-12 bg-muted/30 rounded-2xl">
         <MapPin className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
         <p className="text-muted-foreground">No nearby accommodations or restaurants found</p>
       </div>
@@ -31,7 +30,7 @@ export function NearbyPlaces({ destination, onSelectHotel, onSelectRestaurant }:
           Nearby Accommodations & Dining
         </h2>
         <p className="text-muted-foreground mt-2">
-          Discover places to stay and eat near this destination
+          Discover places to stay and eat near {destination.name}
         </p>
       </div>
 
@@ -60,6 +59,13 @@ export function NearbyPlaces({ destination, onSelectHotel, onSelectRestaurant }:
                       {hotel.category}
                     </span>
                   </div>
+                  {hotel.distanceToDestination && (
+                    <div className="absolute bottom-2 left-2">
+                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-background/90 text-foreground backdrop-blur-sm">
+                        {hotel.distanceToDestination} {hotel.distanceUnit || 'km'}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="p-4">
                   <h4 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
@@ -107,6 +113,13 @@ export function NearbyPlaces({ destination, onSelectHotel, onSelectRestaurant }:
                       {restaurant.cuisine}
                     </span>
                   </div>
+                  {restaurant.distanceToDestination && (
+                    <div className="absolute bottom-2 left-2">
+                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-background/90 text-foreground backdrop-blur-sm">
+                        {restaurant.distanceToDestination} {restaurant.distanceUnit || 'km'}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="p-4">
                   <h4 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">

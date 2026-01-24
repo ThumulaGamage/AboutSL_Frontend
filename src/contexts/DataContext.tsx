@@ -69,6 +69,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const refreshHotels = async () => {
     try {
       const response = await hotelsApi.getAll();
+      console.log('🔄 Refreshed hotels response:', response);
+      console.log('🔄 Refreshed hotels data:', response.data);
+      if (response.data && response.data.length > 0) {
+        console.log('📸 First hotel photoGallery:', response.data[0].photoGallery);
+        console.log('🛎️ First hotel amenities:', response.data[0].amenities);
+        console.log('📸 PhotoGallery type:', typeof response.data[0].photoGallery);
+        console.log('📸 Is Array:', Array.isArray(response.data[0].photoGallery));
+      }
       if (response.success && response.data) {
         setHotels(response.data);
       }
@@ -146,7 +154,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Hotel CRUD
   const addHotel = async (hotel: Partial<Hotel>) => {
     try {
+      console.log('📤 Creating hotel with data:', hotel);
       const response = await hotelsApi.create(hotel);
+      console.log('📥 Response from server:', response);
+      console.log('📥 Response data.photoGallery:', response.data?.photoGallery);
+      console.log('📥 Response data.amenities:', response.data?.amenities);
+      
       if (response.success) {
         toast.success('Hotel created successfully!');
         await refreshHotels();

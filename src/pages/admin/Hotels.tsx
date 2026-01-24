@@ -41,6 +41,11 @@ export function AdminHotels() {
     {
       key: 'location',
       label: 'Location',
+      render: (value: any) => (
+        <span className="text-muted-foreground">
+          {value?.region || 'N/A'}
+        </span>
+      ),
     },
     {
       key: 'price',
@@ -74,19 +79,19 @@ export function AdminHotels() {
     setIsFormOpen(true);
   };
 
-const handleSave = async (hotel: Partial<Hotel>) => {
-  try {
-    if (editingHotel?.id) {
-      await updateHotel(editingHotel.id, hotel);
-    } else {
-      await addHotel(hotel);
+  const handleSave = async (hotel: Partial<Hotel>) => {
+    try {
+      if (editingHotel?.id) {
+        await updateHotel(editingHotel.id, hotel);
+      } else {
+        await addHotel(hotel);
+      }
+      setIsFormOpen(false);
+      setEditingHotel(null);
+    } catch (error) {
+      console.error('Save error:', error);
     }
-    setIsFormOpen(false);
-    setEditingHotel(null);
-  } catch (error) {
-    console.error('Save error:', error);
-  }
-};
+  };
 
   return (
     <AdminLayout>

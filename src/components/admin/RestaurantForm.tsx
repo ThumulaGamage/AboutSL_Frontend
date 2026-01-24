@@ -1,64 +1,119 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, MapPin, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import { Restaurant } from '@/types';
+import { useData } from '@/contexts/DataContext';
+import { Restaurant, Destination } from '@/types';
 
 interface RestaurantFormProps {
   restaurant?: Restaurant | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (restaurant: Restaurant) => void;
+  onSave: (restaurant: Partial<Restaurant>) => Promise<void>;
 }
 
 export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: RestaurantFormProps) {
-  const [formData, setFormData] = useState<Partial<Restaurant>>({
+  const { destinations } = useData();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState<{
+    name?: string;
+    location?: {
+      region: string;
+      address: string;
+      coordinates: { lat: number; lng: number };
+    };
+    cuisine?: string;
+    specialty?: string;
+    price?: number;
+    priceRange?: string;
+    heroImage?: string;
+    photoGallery?: string[];
+    quickSummary?: string;
+    fullDescription?: string;
+    menuHighlights?: string[];
+    nearbyDestinations?: Array<{
+      destinationId: number;
+      destinationName: string;
+      distance: number;
+      unit: string;
+    }>;
+    rating?: number;
+    reviewCount?: number;
+    status?: 'active' | 'inactive' | 'draft';
+  }>({
     name: '',
-    location: '',
+    location: { region: '', address: '', coordinates: { lat: 0, lng: 0 } },
     cuisine: '',
     specialty: '',
     price: 15,
+    priceRange: '$$',
     heroImage: '',
-    photoGallery: [''],
+    photoGallery: [],
     quickSummary: '',
     fullDescription: '',
+    menuHighlights: [],
+    nearbyDestinations: [],
     rating: 4.5,
     reviewCount: 0,
     status: 'active',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showDestinationSelector, setShowDestinationSelector] = useState(false);
+  const [selectedDestinationId, setSelectedDestinationId] = useState<number | ''>('');
+  const [distance, setDistance] = useState<string>('');
 
   useEffect(() => {
     if (restaurant) {
-      setFormData(restaurant);
+      // Extract URLs from photoGallery objects
+      const photoUrls = (restaurant.photoGallery || []).map(item => 
+        typeof item === 'string' ? item : item.url
+      );
+
+      // Extract menu highlights
+      const menuItems = (restaurant.menuHighlights || []).map(item =>
+        typeof item === 'string' ? item : item.name
+      );
+
+      setFormData({
+        ...restaurant,
+        location: restaurant.location || { region: '', address: '', coordinates: { lat: 0, lng: 0 } },
+        photoGallery: photoUrls,
+        menuHighlights: menuItems,
+        nearbyDestinations: restaurant.nearbyDestinations || [],
+      });
     } else {
       setFormData({
         name: '',
-        location: '',
+        location: { region: '', address: '', coordinates: { lat: 0, lng: 0 } },
         cuisine: '',
         specialty: '',
         price: 15,
+        priceRange: '$$',
         heroImage: '',
-        photoGallery: [''],
+        photoGallery: [],
         quickSummary: '',
         fullDescription: '',
+        menuHighlights: [],
+        nearbyDestinations: [],
         rating: 4.5,
         reviewCount: 0,
         status: 'active',
       });
     }
     setErrors({});
+    setIsSubmitting(false);
   }, [restaurant, isOpen]);
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
     
     if (!formData.name?.trim()) newErrors.name = 'Name is required';
-    if (!formData.location?.trim()) newErrors.location = 'Location is required';
+    if (!formData.location?.region?.trim()) newErrors.location = 'Location region is required';
     if (!formData.cuisine?.trim()) newErrors.cuisine = 'Cuisine type is required';
     if (!formData.specialty?.trim()) newErrors.specialty = 'Specialty is required';
     if (!formData.price || formData.price <= 0) newErrors.price = 'Valid price is required';
@@ -69,147 +124,240 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validate()) return;
+    if (isSubmitting) return;
 
-    const id = restaurant?.id || Date.now();
+    setIsSubmitting(true);
 
-    onSave({
-      ...formData,
-      id,
-      slug: formData.name?.toLowerCase().replace(/\s+/g, '-') || '',
-      photoGallery: formData.photoGallery?.filter(url => url.trim()) || [],
-      rating: formData.rating || 4.5,
-      reviewCount: formData.reviewCount || 0,
-      status: formData.status || 'active',
-    } as Restaurant);
+    try {
+      // Transform to object format
+      const photoGalleryObjects = (formData.photoGallery || [])
+        .filter(url => url.trim())
+        .map((url, index) => ({
+          url: url,
+          caption: '',
+          order: index,
+          publicId: ''
+        }));
 
-    onClose();
+      const menuHighlightsObjects = (formData.menuHighlights || [])
+        .filter(item => item.trim())
+        .map(name => ({
+          name: name,
+          description: '',
+          price: 0
+        }));
+
+      const submitData = {
+        ...formData,
+        ...(restaurant?.id && { id: restaurant.id }),
+        photoGallery: photoGalleryObjects,
+        menuHighlights: menuHighlightsObjects,
+      };
+
+      console.log('📤 Submitting restaurant data:', submitData);
+
+      await onSave(submitData);
+      onClose();
+    } catch (error) {
+      console.error('❌ Form submission error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const addGalleryImage = () => {
+  const addNearbyDestination = () => {
+    if (!selectedDestinationId || !distance) return;
+    
+    const dest = destinations.find(d => d.id === selectedDestinationId);
+    if (!dest) return;
+
+    const newNearby = {
+      destinationId: selectedDestinationId as number,
+      destinationName: dest.name,
+      distance: parseFloat(distance),
+      unit: 'km'
+    };
+
     setFormData(prev => ({
       ...prev,
-      photoGallery: [...(prev.photoGallery || []), ''],
+      nearbyDestinations: [...(prev.nearbyDestinations || []), newNearby]
+    }));
+
+    setSelectedDestinationId('');
+    setDistance('');
+    setShowDestinationSelector(false);
+  };
+
+  const removeNearbyDestination = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      nearbyDestinations: (prev.nearbyDestinations || []).filter((_, i) => i !== index)
     }));
   };
 
-  const removeGalleryImage = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      photoGallery: prev.photoGallery?.filter((_, i) => i !== index),
-    }));
-  };
+  const availableDestinations = destinations.filter(d => 
+    d.status === 'active' && 
+    !(formData.nearbyDestinations || []).some(nd => nd.destinationId === d.id)
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto custom-scrollbar">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">
             {restaurant ? 'Edit Restaurant' : 'Add New Restaurant'}
           </DialogTitle>
+          <DialogDescription>
+            Fill in the restaurant details including nearby destinations
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Info */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground border-b border-border pb-2">Basic Information</h3>
+          <div className="space-y-4 bg-muted/30 p-4 rounded-lg">
+            <h3 className="font-semibold text-foreground">Basic Information</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Name *</label>
+              <div>
+                <label className="text-sm font-medium">Name *</label>
                 <Input
                   value={formData.name || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="e.g., The Lake Restaurant"
                   className={errors.name ? 'border-destructive' : ''}
                 />
-                {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+                {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Location *</label>
+              <div>
+                <label className="text-sm font-medium">Region *</label>
                 <Input
-                  value={formData.location || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                  value={formData.location?.region || ''}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    location: { ...prev.location!, region: e.target.value }
+                  }))}
                   placeholder="e.g., Dambulla"
                   className={errors.location ? 'border-destructive' : ''}
                 />
-                {errors.location && <p className="text-xs text-destructive">{errors.location}</p>}
+                {errors.location && <p className="text-xs text-destructive mt-1">{errors.location}</p>}
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Cuisine *</label>
-                <Input
+              <div>
+                <label className="text-sm font-medium">Cuisine Type *</label>
+                <Select
                   value={formData.cuisine || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, cuisine: e.target.value }))}
-                  placeholder="e.g., Sri Lankan, International"
-                  className={errors.cuisine ? 'border-destructive' : ''}
-                />
-                {errors.cuisine && <p className="text-xs text-destructive">{errors.cuisine}</p>}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, cuisine: value }))}
+                >
+                  <SelectTrigger className={errors.cuisine ? 'border-destructive' : ''}>
+                    <SelectValue placeholder="Select cuisine type..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Sri Lankan">Sri Lankan</SelectItem>
+                    <SelectItem value="International">International</SelectItem>
+                 
+                    
+                    <SelectItem value="Seafood">Seafood</SelectItem>
+                    
+                    <SelectItem value="Vegetarian">Vegetarian</SelectItem>
+                    
+                  </SelectContent>
+                </Select>
+                {errors.cuisine && <p className="text-xs text-destructive mt-1">{errors.cuisine}</p>}
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Specialty *</label>
+              <div>
+                <label className="text-sm font-medium">Specialty *</label>
                 <Input
                   value={formData.specialty || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, specialty: e.target.value }))}
                   placeholder="e.g., Rice & Curry"
                   className={errors.specialty ? 'border-destructive' : ''}
                 />
-                {errors.specialty && <p className="text-xs text-destructive">{errors.specialty}</p>}
+                {errors.specialty && <p className="text-xs text-destructive mt-1">{errors.specialty}</p>}
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Average Price ($)</label>
+              <div>
+                <label className="text-sm font-medium">Average Price ($)</label>
                 <Input
                   type="number"
                   value={formData.price || 15}
-                  onChange={(e) => setFormData(prev => ({ ...prev, price: parseInt(e.target.value) || 0 }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
                   min={0}
                   className={errors.price ? 'border-destructive' : ''}
                 />
-                {errors.price && <p className="text-xs text-destructive">{errors.price}</p>}
+                {errors.price && <p className="text-xs text-destructive mt-1">{errors.price}</p>}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Price Range</label>
+                <Select
+                  value={formData.priceRange || '$$'}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, priceRange: value }))}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="$">$ (Budget)</SelectItem>
+                    <SelectItem value="$$">$$ (Moderate)</SelectItem>
+                    <SelectItem value="$$$">$$$ (Upscale)</SelectItem>
+                    <SelectItem value="$$$$">$$$$ (Fine Dining)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
+            <div>
+              <label className="text-sm font-medium">Address</label>
+              <Input
+                value={formData.location?.address || ''}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  location: { ...prev.location!, address: e.target.value }
+                }))}
+                placeholder="Full address"
+              />
+            </div>
+
             <div className="flex items-center gap-4">
-              <label className="text-sm font-medium text-foreground">Status</label>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.status === 'active'}
-                  onCheckedChange={(checked) => 
-                    setFormData(prev => ({ ...prev, status: checked ? 'active' : 'inactive' }))
-                  }
-                />
-                <span className="text-sm text-muted-foreground">
-                  {formData.status === 'active' ? 'Active' : 'Inactive'}
-                </span>
-              </div>
+              <label className="text-sm font-medium">Status</label>
+              <Switch
+                checked={formData.status === 'active'}
+                onCheckedChange={(checked) => 
+                  setFormData(prev => ({ ...prev, status: checked ? 'active' : 'inactive' }))
+                }
+              />
+              <span className="text-sm text-muted-foreground">
+                {formData.status === 'active' ? 'Active' : 'Inactive'}
+              </span>
             </div>
           </div>
 
           {/* Images */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground border-b border-border pb-2">Images</h3>
+          <div className="space-y-4 bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
+            <h3 className="font-semibold">Images</h3>
             
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Hero Image URL *</label>
+            <div>
+              <label className="text-sm font-medium">Hero Image URL *</label>
               <Input
                 value={formData.heroImage || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, heroImage: e.target.value }))}
                 placeholder="https://example.com/image.jpg"
                 className={errors.heroImage ? 'border-destructive' : ''}
               />
-              {errors.heroImage && <p className="text-xs text-destructive">{errors.heroImage}</p>}
+              {errors.heroImage && <p className="text-xs text-destructive mt-1">{errors.heroImage}</p>}
+              {formData.heroImage && (
+                <img src={formData.heroImage} alt="Preview" className="mt-2 h-20 rounded object-cover" />
+              )}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Gallery Images</label>
-              {formData.photoGallery?.map((url, index) => (
-                <div key={index} className="flex gap-2">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Gallery Images</label>
+              {(formData.photoGallery || []).map((url, index) => (
+                <div key={index} className="flex gap-2 mb-2">
                   <Input
                     value={url}
                     onChange={(e) => {
@@ -217,20 +365,31 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
                       newGallery[index] = e.target.value;
                       setFormData(prev => ({ ...prev, photoGallery: newGallery }));
                     }}
-                    placeholder="https://example.com/gallery-image.jpg"
+                    placeholder="Image URL"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeGalleryImage(index)}
-                    className="text-muted-foreground hover:text-destructive"
+                    onClick={() => setFormData(prev => ({
+                      ...prev,
+                      photoGallery: (prev.photoGallery || []).filter((_, i) => i !== index)
+                    }))}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               ))}
-              <Button type="button" variant="outline" size="sm" onClick={addGalleryImage} className="gap-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setFormData(prev => ({
+                  ...prev,
+                  photoGallery: [...(prev.photoGallery || []), '']
+                }))}
+                className="gap-2"
+              >
                 <Plus className="w-4 h-4" />
                 Add Image
               </Button>
@@ -238,23 +397,21 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
           </div>
 
           {/* Descriptions */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground border-b border-border pb-2">Descriptions</h3>
+          <div className="space-y-4 bg-green-50 dark:bg-green-950/20 p-4 rounded-lg">
+            <h3 className="font-semibold">Descriptions</h3>
             
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Quick Summary *</label>
+            <div>
+              <label className="text-sm font-medium">Quick Summary</label>
               <Textarea
                 value={formData.quickSummary || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, quickSummary: e.target.value }))}
                 placeholder="A brief summary for preview cards"
                 rows={2}
-                className={errors.quickSummary ? 'border-destructive' : ''}
               />
-              {errors.quickSummary && <p className="text-xs text-destructive">{errors.quickSummary}</p>}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Full Description *</label>
+            <div>
+              <label className="text-sm font-medium">Full Description *</label>
               <Textarea
                 value={formData.fullDescription || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, fullDescription: e.target.value }))}
@@ -262,17 +419,164 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
                 rows={4}
                 className={errors.fullDescription ? 'border-destructive' : ''}
               />
-              {errors.fullDescription && <p className="text-xs text-destructive">{errors.fullDescription}</p>}
+              {errors.fullDescription && <p className="text-xs text-destructive mt-1">{errors.fullDescription}</p>}
             </div>
           </div>
 
+          {/* Menu Highlights */}
+          <div className="space-y-4 bg-purple-50 dark:bg-purple-950/20 p-4 rounded-lg">
+            <h3 className="font-semibold">Menu Highlights</h3>
+            
+            {(formData.menuHighlights || []).map((item, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  value={item}
+                  onChange={(e) => {
+                    const newMenu = [...(formData.menuHighlights || [])];
+                    newMenu[index] = e.target.value;
+                    setFormData(prev => ({ ...prev, menuHighlights: newMenu }));
+                  }}
+                  placeholder="e.g., Grilled Fish, Rice & Curry"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setFormData(prev => ({
+                    ...prev,
+                    menuHighlights: (prev.menuHighlights || []).filter((_, i) => i !== index)
+                  }))}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setFormData(prev => ({
+                ...prev,
+                menuHighlights: [...(prev.menuHighlights || []), '']
+              }))}
+              className="gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add Menu Item
+            </Button>
+          </div>
+
+          {/* Nearby Destinations */}
+          <div className="space-y-4 bg-orange-50 dark:bg-orange-950/20 p-4 rounded-lg">
+            <h3 className="font-semibold flex items-center gap-2">
+              <MapPin className="w-5 h-5" />
+              Nearby Destinations
+            </h3>
+            
+            <div className="space-y-2">
+              {(formData.nearbyDestinations || []).map((nearby, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-white dark:bg-gray-900 rounded-lg border">
+                  <div>
+                    <div className="font-medium">{nearby.destinationName}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {nearby.distance} {nearby.unit} away
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeNearbyDestination(index)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            {!showDestinationSelector ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDestinationSelector(true)}
+                disabled={availableDestinations.length === 0}
+                className="gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add Nearby Destination
+              </Button>
+            ) : (
+              <div className="space-y-3 p-4 bg-white dark:bg-gray-900 rounded-lg border">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Select Destination</label>
+                  <Select
+                    value={selectedDestinationId.toString()}
+                    onValueChange={(value) => setSelectedDestinationId(Number(value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a destination..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableDestinations.map(dest => (
+                        <SelectItem key={dest.id} value={dest.id.toString()}>
+                          {dest.name} ({dest.region})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Distance (km)</label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={distance}
+                    onChange={(e) => setDistance(e.target.value)}
+                    placeholder="e.g., 5.5"
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={addNearbyDestination}
+                    disabled={!selectedDestinationId || !distance}
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setShowDestinationSelector(false);
+                      setSelectedDestinationId('');
+                      setDistance('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {availableDestinations.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No more destinations available to add
+              </p>
+            )}
+          </div>
+
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              {restaurant ? 'Update Restaurant' : 'Create Restaurant'}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : (restaurant ? 'Update Restaurant' : 'Create Restaurant')}
             </Button>
           </div>
         </form>

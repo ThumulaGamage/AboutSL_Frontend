@@ -30,7 +30,6 @@ export interface RegisterData {
   name: string;
 }
 
-// Destination types
 export interface Destination {
   id: number;
   name: string;
@@ -103,11 +102,16 @@ export interface Destination {
   createdAt: string;
   updatedAt: string;
   
-  // Auto-populated
-  nearbyHotels?: Hotel[];
-  nearbyRestaurants?: Restaurant[];
+  // Auto-populated based on hotels/restaurants linking to this destination
+  nearbyHotels?: (Hotel & { 
+    distanceToDestination?: number; 
+    distanceUnit?: string;
+  })[];
+  nearbyRestaurants?: (Restaurant & { 
+    distanceToDestination?: number; 
+    distanceUnit?: string;
+  })[];
 }
-
 // Hotel types
 export interface Hotel {
   id: number;
@@ -171,8 +175,9 @@ export interface Restaurant {
   name: string;
   slug: string;
   cuisine: string;
+  specialty: string;
   price: number;
-  priceRange?: '$' | '$$' | '$$$' | '$$$$';
+  priceRange?: string;
   heroImage: string;
   heroImagePublicId?: string;
   photoGallery?: Array<{
@@ -183,14 +188,12 @@ export interface Restaurant {
   }>;
   quickSummary?: string;
   fullDescription: string;
-  specialty: string;
   menuHighlights?: Array<{
     name: string;
-    description: string;
-    price: number;
-    image?: string;
+    description?: string;
+    price?: number;
   }>;
-  location: {
+  location?: {
     region: string;
     address: string;
     coordinates: {
@@ -198,22 +201,35 @@ export interface Restaurant {
       lng: number | null;
     };
   };
-  hours?: {
-    [key: string]: string;
-  };
+  hours?: Record<string, string>;
   contact?: {
     phone: string;
     email: string;
+    website?: string;
   };
+  nearbyDestinations?: Array<{
+    destinationId: number;
+    destinationName: string;
+    distance: number;
+    unit: string;
+  }>;
+  nearbyDestinationsDetails?: Array<{
+    destinationId: number;
+    destinationName: string;
+    distance: number;
+    unit: string;
+    destination: Destination;
+  }>;
   metaDescription?: string;
   keywords?: string[];
   status: 'active' | 'inactive' | 'draft';
+  rating: number;
+  reviewCount: number;
   publishedDate?: string;
   completeness: number;
   createdAt: string;
   updatedAt: string;
 }
-
 // Image upload types
 export interface ImageUploadResponse {
   success: boolean;

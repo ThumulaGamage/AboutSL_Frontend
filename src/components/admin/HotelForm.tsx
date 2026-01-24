@@ -19,7 +19,31 @@ interface HotelFormProps {
 export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
   const { destinations } = useData();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<Partial<Hotel>>({
+  const [formData, setFormData] = useState<{
+    name?: string;
+    location?: {
+      region: string;
+      address: string;
+      coordinates: { lat: number; lng: number };
+    };
+    category?: 'luxury' | 'mid-range' | 'budget';
+    price?: number;
+    currency?: string;
+    heroImage?: string;
+    photoGallery?: string[];
+    quickSummary?: string;
+    fullDescription?: string;
+    amenities?: string[];
+    nearbyDestinations?: Array<{
+      destinationId: number;
+      destinationName: string;
+      distance: number;
+      unit: string;
+    }>;
+    rating?: number;
+    reviewCount?: number;
+    status?: 'active' | 'inactive' | 'draft';
+  }>({
     name: '',
     location: { region: '', address: '', coordinates: { lat: 0, lng: 0 } },
     category: 'mid-range',
@@ -42,12 +66,28 @@ export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
   const [distance, setDistance] = useState<string>('');
 
   useEffect(() => {
+    console.log('🔄 Hotel prop changed:', hotel);
+    
     if (hotel) {
+      // Extract URLs from photoGallery objects
+      const photoUrls = (hotel.photoGallery || []).map(item => {
+        console.log('📸 Photo item:', item, 'Type:', typeof item);
+        return typeof item === 'string' ? item : item.url;
+      });
+      console.log('📸 Extracted photo URLs:', photoUrls);
+
+      // Extract names from amenities objects
+      const amenityNames = (hotel.amenities || []).map(item => {
+        console.log('🛎️ Amenity item:', item, 'Type:', typeof item);
+        return typeof item === 'string' ? item : item.name;
+      });
+      console.log('🛎️ Extracted amenity names:', amenityNames);
+
       setFormData({
         ...hotel,
         location: hotel.location || { region: '', address: '', coordinates: { lat: 0, lng: 0 } },
-        photoGallery: hotel.photoGallery || [],
-        amenities: hotel.amenities || [],
+        photoGallery: photoUrls,
+        amenities: amenityNames,
         nearbyDestinations: hotel.nearbyDestinations || [],
       });
     } else {
@@ -94,17 +134,38 @@ export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
     setIsSubmitting(true);
 
     try {
+      // Transform to object format to match Hotel interface
+      const photoGalleryObjects = (formData.photoGallery || [])
+        .filter(url => url.trim())
+        .map((url, index) => ({
+          url: url,
+          caption: '',
+          order: index,
+          publicId: ''
+        }));
+
+      const amenitiesObjects = (formData.amenities || [])
+        .filter(a => a.trim())
+        .map(name => ({
+          name: name,
+          icon: ''
+        }));
+
       const submitData = {
         ...formData,
         ...(hotel?.id && { id: hotel.id }),
-        photoGallery: (formData.photoGallery || []).filter(url => url.trim()),
-        amenities: (formData.amenities || []).filter(a => a.trim()),
+        photoGallery: photoGalleryObjects,
+        amenities: amenitiesObjects,
       };
+
+      console.log('📤 SUBMITTING HOTEL DATA:', JSON.stringify(submitData, null, 2));
+      console.log('📸 Photo Gallery Objects:', photoGalleryObjects);
+      console.log('🛎️ Amenities Objects:', amenitiesObjects);
 
       await onSave(submitData);
       onClose();
     } catch (error) {
-      console.error('Form submission error:', error);
+      console.error('❌ Form submission error:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -140,7 +201,6 @@ export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
     }));
   };
 
-  // Available destinations (not already added)
   const availableDestinations = destinations.filter(d => 
     d.status === 'active' && 
     !(formData.nearbyDestinations || []).some(nd => nd.destinationId === d.id)
@@ -181,7 +241,7 @@ export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
                   value={formData.location?.region || ''}
                   onChange={(e) => setFormData(prev => ({ 
                     ...prev, 
-                    location: { ...(prev.location || {}), region: e.target.value }
+                    location: { ...prev.location!, region: e.target.value }
                   }))}
                   placeholder="e.g., Dambulla"
                   className={errors.location ? 'border-destructive' : ''}
@@ -235,7 +295,7 @@ export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
                 value={formData.location?.address || ''}
                 onChange={(e) => setFormData(prev => ({ 
                   ...prev, 
-                  location: { ...(prev.location || {}), address: e.target.value }
+                  location: { ...prev.location!, address: e.target.value }
                 }))}
                 placeholder="Full address"
               />
