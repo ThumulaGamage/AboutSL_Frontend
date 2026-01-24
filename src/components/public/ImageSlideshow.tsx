@@ -5,39 +5,41 @@ import { useNavigate } from 'react-router-dom';
 
 const slides = [
   {
-    image: 'https://images.pexels.com/photos/2166553/pexels-photo-2166553.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    image: 'https://as1.ftcdn.net/v2/jpg/06/24/68/34/1000_F_624683436_GfMOP75j5LxBIBktl9KRrtqwiQoroh5K.jpg',
     title: 'Ancient Wonders',
     subtitle: 'Discover Sigiriya Rock Fortress',
     description: 'Climb the legendary Lion Rock and explore 1,500-year-old frescoes',
     badge: 'Historical Sites'
   },
   {
-    image: 'https://images.pexels.com/photos/1684187/pexels-photo-1684187.jpeg?auto=compress&cs=tinysrgb&w=1920',
-    title: 'Pristine Beaches',
-    subtitle: 'Relax on Golden Shores',
-    description: 'Sun-kissed coastlines and crystal-clear tropical waters await',
-    badge: 'Beach Paradise'
+   image: 'https://images.pexels.com/photos/27669330/pexels-photo-27669330.jpeg',
+title: 'Galle Fort',
+subtitle: 'Walk Through Colonial History',
+description: 'A UNESCO World Heritage site with cobblestone streets, ramparts, and timeless architecture',
+badge: 'Historic Landmark'
   },
   {
-    image: 'https://images.pexels.com/photos/3581369/pexels-photo-3581369.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    image: 'https://thumbs.dreamstime.com/b/sri-lankan-leopard-panthera-pardus-kotiya-big-spotted-cat-lying-tree-nature-habitat-yala-national-park-sri-lanka-67952131.jpg',
     title: 'Wildlife Safari',
     subtitle: 'Experience Yala National Park',
     description: 'Home to the highest density of leopards in the world',
     badge: 'Wildlife'
   },
   {
-    image: 'https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg?auto=compress&cs=tinysrgb&w=1920',
-    title: 'Misty Mountains',
-    subtitle: 'Explore the Hill Country',
-    description: 'Rolling tea plantations and breathtaking mountain vistas',
-    badge: 'Hill Country'
+image: 'https://images.unsplash.com/photo-1566296314736-6eaac1ca0cb9?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bnV3YXJhJTIwZWxpeWElMjBzcmklMjBsYW5rYXxlbnwwfHwwfHx8MA%3D%3D',
+title: 'Ella',
+subtitle: 'Discover the Heart of the Hills',
+description: 'Lush green valleys, waterfalls, and panoramic views in Sri Lanka’s hill country',
+badge: 'Hill Town'
+
   },
   {
-    image: 'https://images.pexels.com/photos/12891725/pexels-photo-12891725.jpeg?auto=compress&cs=tinysrgb&w=1920',
-    title: 'Cultural Heritage',
-    subtitle: 'Walk Through History',
-    description: 'Ancient temples and UNESCO World Heritage Sites',
-    badge: 'Culture & Heritage'
+    image: 'https://images.unsplash.com/photo-1678914906666-53bbe53fe468?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8anVuZ2xlJTIwYmVhY2h8ZW58MHx8MHx8fDA%3D',
+title: 'Jungle Beach',
+subtitle: 'Escape into Nature',
+description: 'A hidden tropical beach surrounded by lush jungle and turquoise waters',
+badge: 'Hidden Beach'
+
   }
 ];
 
