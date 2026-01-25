@@ -1,63 +1,97 @@
-import { MapPin, ArrowRight, Sparkles, UtensilsCrossed } from 'lucide-react';
+import { MapPin, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useData } from '@/contexts/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { Destination, Hotel, Restaurant } from '@/types';
 
-interface TopRatedCardProps {
-  item: Destination | Hotel | Restaurant;
-  type: 'destination' | 'hotel' | 'restaurant';
+interface LargeCardProps {
+  item: Destination;
   index: number;
 }
 
-function TopRatedCard({ item, type, index }: TopRatedCardProps) {
+function LargeDestinationCard({ item, index }: LargeCardProps) {
+  const navigate = useNavigate();
+
+  return (
+    <div 
+      onClick={() => navigate(`/destinations/${item.id}`)}
+      className="group cursor-pointer relative rounded-3xl overflow-hidden opacity-0 animate-fade-in-up"
+      style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
+    >
+      {/* Image Container - Full height */}
+      <div className="relative h-[400px] md:h-[500px]">
+        <img
+          src={item.heroImage}
+          alt={item.name}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        
+        {/* Category Badge */}
+        <div className="absolute top-6 left-6">
+          <span className="px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-primary text-primary-foreground backdrop-blur-sm">
+            {item.category}
+          </span>
+        </div>
+
+        {/* Content at Bottom */}
+        <div className="absolute bottom-0 left-0 right-0 p-8">
+          <div className="flex items-center gap-2 text-white/80 text-sm mb-3">
+            <MapPin className="w-4 h-4" />
+            {item.region}
+          </div>
+          <h3 className="font-display text-3xl md:text-4xl font-bold text-white mb-3 group-hover:text-primary transition-colors">
+            {item.name}
+          </h3>
+          {item.quickSummary && (
+            <p className="text-white/90 text-base leading-relaxed line-clamp-2 mb-4 max-w-2xl">
+              {item.quickSummary}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Hover Border Effect */}
+      <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-primary/40 transition-colors pointer-events-none" />
+    </div>
+  );
+}
+
+interface HotelCardProps {
+  item: Hotel | Restaurant;
+  type: 'hotel' | 'restaurant';
+  index: number;
+}
+
+function HotelRestaurantCard({ item, type, index }: HotelCardProps) {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    if (type === 'destination') {
-      navigate(`/destinations/${item.id}`);
-    } else if (type === 'hotel') {
+    if (type === 'hotel') {
       navigate(`/stay-eat/hotels/${item.id}`);
     } else {
       navigate(`/stay-eat/restaurants/${item.id}`);
     }
   };
 
-  // Helper functions for type-safe access
-  const getDescription = () => {
-    if (type === 'destination') {
-      const dest = item as Destination;
-      return dest.quickSummary || dest.overview?.description || dest.fullDescription?.slice(0, 100);
-    } else if (type === 'hotel') {
-      const hotel = item as Hotel;
-      return hotel.quickSummary || hotel.overview?.description || hotel.fullDescription?.slice(0, 100);
-    } else {
-      const restaurant = item as Restaurant;
-      return restaurant.quickSummary || restaurant.specialty || restaurant.fullDescription?.slice(0, 100);
-    }
-  };
-
   const getPrice = () => {
     if (type === 'hotel') {
       const hotel = item as Hotel;
-      const currency = hotel.currency || '$';
-      const price = hotel.price || hotel.pricePerNight;
-      return price ? `${currency}${price}` : null;
-    } else if (type === 'restaurant') {
+      return `${hotel.currency || '$'}${hotel.price}/night`;
+    } else {
       const restaurant = item as Restaurant;
       return restaurant.priceRange || '$$';
     }
-    return null;
   };
 
-  const getBadge = () => {
-    if (type === 'destination') return (item as Destination).category;
+  const getCategory = () => {
     if (type === 'hotel') return (item as Hotel).category;
     return (item as Restaurant).cuisine;
   };
 
   const getLocation = () => {
-    if (type === 'destination') return (item as Destination).region;
     if (type === 'hotel') return (item as Hotel).location?.region || 'Sri Lanka';
     return (item as Restaurant).location?.region || 'Sri Lanka';
   };
@@ -65,11 +99,11 @@ function TopRatedCard({ item, type, index }: TopRatedCardProps) {
   return (
     <div 
       onClick={handleClick}
-      className="group cursor-pointer card-modern relative"
-      style={{ animationDelay: `${index * 100}ms` }}
+      className="group cursor-pointer relative rounded-3xl overflow-hidden bg-card shadow-lg hover:shadow-2xl transition-all duration-500 opacity-0 animate-fade-in-up"
+      style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
     >
       {/* Image Container */}
-      <div className="relative h-56 overflow-hidden">
+      <div className="relative h-[280px] overflow-hidden">
         <img
           src={item.heroImage}
           alt={item.name}
@@ -77,59 +111,48 @@ function TopRatedCard({ item, type, index }: TopRatedCardProps) {
         />
         
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         
         {/* Category Badge */}
         <div className="absolute top-4 left-4">
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/90 text-foreground backdrop-blur-sm capitalize">
-            {getBadge()}
+          <span className="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-foreground backdrop-blur-sm">
+            {getCategory()}
           </span>
         </div>
 
-        {/* Bottom Info on Image */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <h3 className="font-display text-xl font-bold text-white mb-1 group-hover:text-secondary transition-colors text-shadow">
-            {item.name}
-          </h3>
-          <div className="flex items-center gap-1.5 text-white/80 text-sm">
-            <MapPin className="w-3.5 h-3.5" />
-            {getLocation()}
-          </div>
+        {/* Price Badge */}
+        <div className="absolute bottom-4 right-4">
+          <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-primary text-primary-foreground backdrop-blur-sm">
+            {getPrice()}
+          </span>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-5">
-        <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2 mb-4">
-          {getDescription()}
-        </p>
-        
-        <div className="flex items-center justify-between">
-          {type === 'hotel' && getPrice() && (
-            <div className="text-lg font-bold text-primary">
-              {getPrice()}
-              <span className="text-sm text-muted-foreground font-normal">/night</span>
-            </div>
-          )}
-          {type === 'restaurant' && getPrice() && (
-            <div className="text-lg font-bold text-primary">
-              {getPrice()}
-            </div>
-          )}
-          {type === 'destination' && (
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <Sparkles className="w-4 h-4 text-secondary" />
-              <span>Featured</span>
-            </div>
-          )}
-          <span className="text-primary text-sm font-medium group-hover:translate-x-1 transition-transform flex items-center gap-1">
-            {type === 'restaurant' ? 'View Menu' : 'Explore'} <ArrowRight className="w-4 h-4" />
-          </span>
+      <div className="p-6">
+        <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
+          <MapPin className="w-4 h-4" />
+          {getLocation()}
         </div>
+        
+        <h3 className="font-display text-2xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
+          {item.name}
+        </h3>
+        
+        {item.quickSummary && (
+          <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2 mb-4">
+            {item.quickSummary}
+          </p>
+        )}
+
+        <button className="text-sm font-bold uppercase tracking-wider text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
+          View Property Details
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        </button>
       </div>
 
       {/* Hover Border Effect */}
-      <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-primary/30 transition-colors pointer-events-none" />
+      <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-primary/30 transition-colors pointer-events-none" />
     </div>
   );
 }
@@ -140,7 +163,7 @@ export function TopRatedSection() {
 
   const topDestinations = destinations
     .filter(d => d.status === 'active')
-    .slice(0, 4);
+    .slice(0, 7);
 
   const topHotels = hotels
     .filter(h => h.status === 'active')
@@ -151,156 +174,176 @@ export function TopRatedSection() {
     .slice(0, 4);
 
   return (
-    <div className="space-y-32">
-      {/* Top Destinations - Editorial Style */}
+    <div className="space-y-24">
+      {/* Top Destinations - Bento Grid */}
       <section className="relative">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <div>
-            <p className="text-primary font-semibold uppercase tracking-widest text-sm mb-4">✦ Explore Places</p>
-            <h2 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1]">
-              THE PLACES
-              <span className="block text-muted-foreground/40">TO BE.</span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+          {/* Left: Title */}
+          <div className="lg:col-span-5">
+            <p className="text-primary font-semibold uppercase tracking-widest text-sm mb-4">✦ Curated Selection</p>
+            <h2 className="font-display text-5xl md:text-7xl font-bold text-foreground leading-[1.05]">
+              THE PLACES<br />
+              <span className="text-muted-foreground/30">TO BE.</span>
             </h2>
           </div>
-          <div className="max-w-md">
-            <p className="text-muted-foreground text-lg mb-4">
-              Discover Sri Lanka's most breathtaking destinations, from ancient ruins to pristine beaches and misty highlands.
-            </p>
-            <Button 
-              variant="link" 
-              className="p-0 h-auto text-foreground hover:text-primary font-semibold uppercase tracking-wider text-sm group"
-              onClick={() => navigate('/destinations')}
-            >
-              Explore All Places
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" />
-            </Button>
+          
+          {/* Right: Description */}
+          <div className="lg:col-span-7 flex items-end">
+            <div>
+              <p className="text-muted-foreground text-base md:text-lg leading-relaxed mb-6">
+                Our 2026 guide features locations that define the current spirit of the island—from cloud forests to ancient temples, each destination tells a story.
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {topDestinations.map((dest, index) => (
-            <div 
-              key={dest.id}
-              className="opacity-0 animate-fade-in-up"
-              style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
-            >
-              <TopRatedCard 
-                item={dest} 
-                type="destination" 
-                index={index}
-              />
+        {/* Bento Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Large Card - Spans 2 columns */}
+          {topDestinations[0] && (
+            <div className="lg:col-span-2">
+              <LargeDestinationCard item={topDestinations[0]} index={0} />
             </div>
-          ))}
+          )}
+          
+          {/* Medium Cards */}
+          {topDestinations[1] && (
+            <div className="lg:col-span-1">
+              <LargeDestinationCard item={topDestinations[1]} index={1} />
+            </div>
+          )}
+          {topDestinations[2] && (
+            <div className="lg:col-span-1">
+              <LargeDestinationCard item={topDestinations[2]} index={2} />
+            </div>
+          )}
+
+          {/* Second Row */}
+          {topDestinations[3] && (
+            <div className="lg:col-span-1">
+              <LargeDestinationCard item={topDestinations[3]} index={3} />
+            </div>
+          )}
+          {topDestinations[4] && (
+            <div className="lg:col-span-2">
+              <LargeDestinationCard item={topDestinations[4]} index={4} />
+            </div>
+          )}
+          {topDestinations[5] && (
+            <div className="lg:col-span-1">
+              <LargeDestinationCard item={topDestinations[5]} index={5} />
+            </div>
+          )}
         </div>
 
-        <div className="mt-8 md:hidden">
+        <div className="text-center">
           <Button 
-            className="w-full gap-2 sunset-gradient text-white"
+            className="px-8 py-6 text-sm font-bold uppercase tracking-wider bg-foreground text-background hover:bg-foreground/90 rounded-full"
             onClick={() => navigate('/destinations')}
           >
-            View All Destinations <ArrowRight className="w-4 h-4" />
+            Explore All Places
           </Button>
         </div>
       </section>
 
-      {/* Top Hotels & Stays - Editorial Style */}
+      {/* Top Hotels - 2 Column Grid */}
       <section className="relative">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <div>
-            <p className="text-secondary font-semibold uppercase tracking-widest text-sm mb-4">✦ Where to Stay</p>
-            <h2 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1]">
-              THE ART OF
-              <span className="block text-muted-foreground/40">STAYING.</span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+          {/* Left: Title */}
+          <div className="lg:col-span-5">
+            <p className="text-secondary font-semibold uppercase tracking-widest text-sm mb-4">✦ Signature Experiences</p>
+            <h2 className="font-display text-5xl md:text-7xl font-bold text-foreground leading-[1.05]">
+              THE ART OF<br />
+              <span className="text-muted-foreground/30">STAYING.</span>
             </h2>
           </div>
-          <div className="max-w-md">
-            <p className="text-muted-foreground text-lg mb-4">
-              Experience luxury and comfort in handpicked accommodations, from boutique hotels to beachfront resorts.
-            </p>
-            <Button 
-              variant="link" 
-              className="p-0 h-auto text-foreground hover:text-secondary font-semibold uppercase tracking-wider text-sm group"
-              onClick={() => navigate('/stay-eat')}
-            >
-              View All Stays
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" />
-            </Button>
+          
+          {/* Right: Description + Navigation */}
+          <div className="lg:col-span-7 flex items-end justify-between">
+            <div className="flex-1">
+              <p className="text-muted-foreground text-base md:text-lg leading-relaxed mb-6">
+                Experience luxury and comfort in handpicked accommodations, from boutique hotels to beachfront resorts across Sri Lanka.
+              </p>
+            </div>
+            <div className="hidden lg:flex gap-3 ml-6">
+              <button className="p-3 rounded-full border-2 border-border hover:border-foreground transition-colors">
+                <ArrowRight className="w-5 h-5 rotate-180" />
+              </button>
+              <button className="p-3 rounded-full border-2 border-border hover:border-foreground transition-colors">
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {topHotels.map((hotel, index) => (
-            <div 
+            <HotelRestaurantCard 
               key={hotel.id}
-              className="opacity-0 animate-fade-in-up"
-              style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
-            >
-              <TopRatedCard 
-                item={hotel} 
-                type="hotel" 
-                index={index}
-              />
-            </div>
+              item={hotel} 
+              type="hotel" 
+              index={index}
+            />
           ))}
         </div>
 
-        <div className="mt-8 md:hidden">
+        <div className="text-center">
           <Button 
-            className="w-full gap-2 sunset-gradient text-white"
+            className="px-8 py-6 text-sm font-bold uppercase tracking-wider bg-foreground text-background hover:bg-foreground/90 rounded-full"
             onClick={() => navigate('/stay-eat')}
           >
-            View All Hotels & Stays <ArrowRight className="w-4 h-4" />
+            View Full Collection
           </Button>
         </div>
       </section>
 
-      {/* Top Restaurants - Editorial Style */}
+      {/* Top Restaurants - 2 Column Grid */}
       <section className="relative">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <div>
-            <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-4">✦ Where to Dine</p>
-            <h2 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1]">
-              FLAVORS OF
-              <span className="block text-muted-foreground/40">THE ISLAND.</span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+          {/* Left: Title */}
+          <div className="lg:col-span-5">
+            <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-4">✦ Culinary Journey</p>
+            <h2 className="font-display text-5xl md:text-7xl font-bold text-foreground leading-[1.05]">
+              FLAVORS OF<br />
+              <span className="text-muted-foreground/30">THE ISLAND.</span>
             </h2>
           </div>
-          <div className="max-w-md">
-            <p className="text-muted-foreground text-lg mb-4">
-              Savor authentic Sri Lankan cuisine and international flavors in carefully selected restaurants across the island.
-            </p>
-            <Button 
-              variant="link" 
-              className="p-0 h-auto text-foreground hover:text-accent font-semibold uppercase tracking-wider text-sm group"
-              onClick={() => navigate('/stay-eat?tab=restaurants')}
-            >
-              View All Restaurants
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" />
-            </Button>
+          
+          {/* Right: Description + Navigation */}
+          <div className="lg:col-span-7 flex items-end justify-between">
+            <div className="flex-1">
+              <p className="text-muted-foreground text-base md:text-lg leading-relaxed mb-6">
+                Savor authentic Sri Lankan cuisine and international flavors in carefully selected restaurants across the island.
+              </p>
+            </div>
+            <div className="hidden lg:flex gap-3 ml-6">
+              <button className="p-3 rounded-full border-2 border-border hover:border-foreground transition-colors">
+                <ArrowRight className="w-5 h-5 rotate-180" />
+              </button>
+              <button className="p-3 rounded-full border-2 border-border hover:border-foreground transition-colors">
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {topRestaurants.map((restaurant, index) => (
-            <div 
+            <HotelRestaurantCard 
               key={restaurant.id}
-              className="opacity-0 animate-fade-in-up"
-              style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
-            >
-              <TopRatedCard 
-                item={restaurant} 
-                type="restaurant" 
-                index={index}
-              />
-            </div>
+              item={restaurant} 
+              type="restaurant" 
+              index={index}
+            />
           ))}
         </div>
 
-        <div className="mt-8 md:hidden">
+        <div className="text-center">
           <Button 
-            className="w-full gap-2 sunset-gradient text-white"
+            className="px-8 py-6 text-sm font-bold uppercase tracking-wider bg-foreground text-background hover:bg-foreground/90 rounded-full"
             onClick={() => navigate('/stay-eat?tab=restaurants')}
           >
-            View All Restaurants <ArrowRight className="w-4 h-4" />
+            View Full Collection
           </Button>
         </div>
       </section>

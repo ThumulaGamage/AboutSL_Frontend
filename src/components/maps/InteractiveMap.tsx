@@ -1,18 +1,18 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { MapPin, Loader2, AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { Destination } from '@/types';
 import sriLankaMap from '@/assets/srilanka-map.png';
 
 interface InteractiveMapProps {
   destinations: Destination[];
+  selectedDestination?: Destination | null;
+  onMarkerClick?: (destination: Destination) => void;
 }
 
 const containerStyle = {
   width: '100%',
   height: '100%',
-  borderRadius: '0.75rem',
 };
 
 // Sri Lanka center
@@ -28,27 +28,41 @@ const sriLankaBounds = {
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
-export function InteractiveMap({ destinations }: InteractiveMapProps) {
-  const navigate = useNavigate();
-  const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null);
+export function InteractiveMap({ destinations, selectedDestination, onMarkerClick }: InteractiveMapProps) {
+  const [infoWindowDest, setInfoWindowDest] = useState<Destination | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
   });
 
-  const handleMarkerClick = useCallback((destination: Destination) => {
-    setSelectedDestination(destination);
+  const onLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
   }, []);
+
+  // Center map on selected destination and show info window
+  useEffect(() => {
+    if (selectedDestination && selectedDestination.location?.coordinates && mapRef.current) {
+      mapRef.current.panTo({
+        lat: selectedDestination.location.coordinates.lat,
+        lng: selectedDestination.location.coordinates.lng
+      });
+      mapRef.current.setZoom(11);
+      setInfoWindowDest(selectedDestination);
+    }
+  }, [selectedDestination]);
+
+  const handleMarkerClick = useCallback((destination: Destination) => {
+    if (onMarkerClick) {
+      onMarkerClick(destination);
+    }
+  }, [onMarkerClick]);
 
   const handleInfoWindowClose = useCallback(() => {
-    setSelectedDestination(null);
+    setInfoWindowDest(null);
   }, []);
-
-  const handleNavigate = useCallback((destination: Destination) => {
-    navigate(`/destinations/${destination.id}`);
-  }, [navigate]);
 
   // Filter destinations with valid coordinates
   const validDestinations = destinations.filter(
@@ -57,12 +71,12 @@ export function InteractiveMap({ destinations }: InteractiveMapProps) {
 
   // Fallback to artistic map when no API key
   if (!GOOGLE_MAPS_API_KEY) {
-    return <FallbackMap destinations={validDestinations} />;
+    return <FallbackMap destinations={validDestinations} selectedDestination={selectedDestination} onDestinationClick={onMarkerClick} />;
   }
 
   if (loadError) {
     return (
-      <div className="h-full flex items-center justify-center bg-muted/50 rounded-xl">
+      <div className="h-full flex items-center justify-center bg-muted/50">
         <div className="text-center p-8">
           <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
           <p className="text-destructive font-medium">Failed to load Google Maps</p>
@@ -74,7 +88,7 @@ export function InteractiveMap({ destinations }: InteractiveMapProps) {
 
   if (!isLoaded) {
     return (
-      <div className="h-full flex items-center justify-center bg-muted/50 rounded-xl">
+      <div className="h-full flex items-center justify-center bg-muted/50">
         <Loader2 className="w-10 h-10 animate-spin text-primary" />
       </div>
     );
@@ -85,6 +99,7 @@ export function InteractiveMap({ destinations }: InteractiveMapProps) {
       mapContainerStyle={containerStyle}
       center={sriLankaCenter}
       zoom={8}
+      onLoad={onLoad}
       options={{
         restriction: {
           latLngBounds: sriLankaBounds,
@@ -118,56 +133,59 @@ export function InteractiveMap({ destinations }: InteractiveMapProps) {
         ],
       }}
     >
-      {validDestinations.map((dest) => (
-        <Marker
-          key={dest.id}
-          position={{
-            lat: dest.location.coordinates.lat!,
-            lng: dest.location.coordinates.lng!
-          }}
-          onClick={() => handleMarkerClick(dest)}
-          onMouseOver={() => setHoveredId(dest.id)}
-          onMouseOut={() => setHoveredId(null)}
-          animation={hoveredId === dest.id ? google.maps.Animation.BOUNCE : undefined}
-          icon={{
-            url: 'data:image/svg+xml,' + encodeURIComponent(`
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="48" viewBox="0 0 40 48">
-                <path d="M20 0C8.954 0 0 8.954 0 20c0 11.046 20 28 20 28s20-16.954 20-28C40 8.954 31.046 0 20 0z" fill="#0D9488"/>
-                <circle cx="20" cy="18" r="8" fill="white"/>
-              </svg>
-            `),
-            scaledSize: new google.maps.Size(40, 48),
-            anchor: new google.maps.Point(20, 48),
-          }}
-        />
-      ))}
+      {validDestinations.map((dest) => {
+        const isSelected = selectedDestination?.id === dest.id;
+        return (
+          <Marker
+            key={dest.id}
+            position={{
+              lat: dest.location.coordinates.lat!,
+              lng: dest.location.coordinates.lng!
+            }}
+            onClick={() => handleMarkerClick(dest)}
+            onMouseOver={() => setHoveredId(dest.id)}
+            onMouseOut={() => setHoveredId(null)}
+            animation={isSelected ? google.maps.Animation.BOUNCE : undefined}
+            icon={{
+              url: 'data:image/svg+xml,' + encodeURIComponent(`
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="48" viewBox="0 0 40 48">
+                  <path d="M20 0C8.954 0 0 8.954 0 20c0 11.046 20 28 20 28s20-16.954 20-28C40 8.954 31.046 0 20 0z" fill="${isSelected ? '#f59e0b' : '#0D9488'}"/>
+                  <circle cx="20" cy="18" r="8" fill="white"/>
+                </svg>
+              `),
+              scaledSize: new google.maps.Size(isSelected ? 48 : 40, isSelected ? 58 : 48),
+              anchor: new google.maps.Point(isSelected ? 24 : 20, isSelected ? 58 : 48),
+            }}
+          />
+        );
+      })}
 
-      {selectedDestination && selectedDestination.location?.coordinates?.lat && (
+      {infoWindowDest && infoWindowDest.location?.coordinates?.lat && (
         <InfoWindow
           position={{
-            lat: selectedDestination.location.coordinates.lat,
-            lng: selectedDestination.location.coordinates.lng!
+            lat: infoWindowDest.location.coordinates.lat,
+            lng: infoWindowDest.location.coordinates.lng!
           }}
           onCloseClick={handleInfoWindowClose}
         >
           <div className="p-1 max-w-[280px]">
             <img
-              src={selectedDestination.heroImage}
-              alt={selectedDestination.name}
+              src={infoWindowDest.heroImage}
+              alt={infoWindowDest.name}
               className="w-full h-32 object-cover rounded-lg mb-3"
             />
             <h3 className="font-semibold text-foreground text-lg mb-1">
-              {selectedDestination.name}
+              {infoWindowDest.name}
             </h3>
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
               <MapPin className="w-3.5 h-3.5" />
-              {selectedDestination.region}
+              {infoWindowDest.region}
             </div>
             <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-              {selectedDestination.overview?.description || 'Explore this beautiful destination'}
+              {infoWindowDest.overview?.description || 'Explore this beautiful destination'}
             </p>
             <button
-              onClick={() => handleNavigate(selectedDestination)}
+              onClick={() => handleMarkerClick(infoWindowDest)}
               className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
             >
               View Details
@@ -180,8 +198,11 @@ export function InteractiveMap({ destinations }: InteractiveMapProps) {
 }
 
 // Fallback artistic map component
-function FallbackMap({ destinations }: { destinations: Destination[] }) {
-  const navigate = useNavigate();
+function FallbackMap({ destinations, selectedDestination, onDestinationClick }: { 
+  destinations: Destination[]; 
+  selectedDestination?: Destination | null;
+  onDestinationClick?: (destination: Destination) => void;
+}) {
   const [hoveredDestination, setHoveredDestination] = useState<Destination | null>(null);
 
   const getPosition = (coordinates: { lat: number; lng: number }) => {
@@ -202,7 +223,7 @@ function FallbackMap({ destinations }: { destinations: Destination[] }) {
   return (
     <div className="relative w-full h-full flex items-center justify-center p-4">
       <div className="absolute inset-4 flex items-center justify-center">
-        <div className="relative" style={{ maxWidth: '400px', width: '100%' }}>
+        <div className="relative" style={{ maxWidth: '500px', width: '100%' }}>
           <img
             src={sriLankaMap}
             alt="Sri Lanka Map"
@@ -212,24 +233,32 @@ function FallbackMap({ destinations }: { destinations: Destination[] }) {
           {destinations.map((dest) => {
             if (!dest.location?.coordinates?.lat || !dest.location?.coordinates?.lng) return null;
             
+            const isSelected = selectedDestination?.id === dest.id;
             const pos = getPosition({
               lat: dest.location.coordinates.lat,
               lng: dest.location.coordinates.lng
             });
+            
             return (
               <button
                 key={dest.id}
                 className="absolute transform -translate-x-1/2 -translate-y-1/2 group z-10"
                 style={{ left: pos.left, top: pos.top }}
-                onClick={() => navigate(`/destinations/${dest.id}`)}
+                onClick={() => onDestinationClick?.(dest)}
                 onMouseEnter={() => setHoveredDestination(dest)}
                 onMouseLeave={() => setHoveredDestination(null)}
               >
-                <span className="absolute inset-0 w-8 h-8 -m-2 rounded-full bg-secondary/30 animate-ping" />
-                <span className="relative flex items-center justify-center w-4 h-4 rounded-full bg-secondary shadow-lg border-2 border-white dark:border-background group-hover:scale-125 transition-transform">
-                  <MapPin className="w-2.5 h-2.5 text-white" />
+                {isSelected && (
+                  <span className="absolute inset-0 w-10 h-10 -m-3 rounded-full bg-amber-500/50 animate-ping" />
+                )}
+                <span className={`relative flex items-center justify-center rounded-full shadow-lg border-2 border-white dark:border-background group-hover:scale-125 transition-all ${
+                  isSelected 
+                    ? 'w-6 h-6 bg-amber-500 animate-bounce' 
+                    : 'w-4 h-4 bg-secondary'
+                }`}>
+                  <MapPin className={`text-white ${isSelected ? 'w-4 h-4' : 'w-2.5 h-2.5'}`} />
                 </span>
-                <span className="absolute left-6 top-1/2 -translate-y-1/2 whitespace-nowrap bg-card/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-md text-sm font-medium text-foreground opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-border">
+                <span className="absolute left-8 top-1/2 -translate-y-1/2 whitespace-nowrap bg-card/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-md text-sm font-medium text-foreground opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-border">
                   {dest.name}
                 </span>
               </button>

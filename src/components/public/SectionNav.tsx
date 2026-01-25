@@ -11,17 +11,15 @@ export interface Section {
 interface SectionNavProps {
   sections: Section[];
   className?: string;
+  layout?: 'horizontal' | 'vertical';
 }
 
-export function SectionNav({ sections, className = '' }: SectionNavProps) {
+export function SectionNav({ sections, className = '', layout = 'horizontal' }: SectionNavProps) {
   const [activeSection, setActiveSection] = useState(sections[0]?.id || '');
 
   useEffect(() => {
     const handleScroll = () => {
-      // Get scroll position with offset for headers
       const scrollPosition = window.scrollY + 200;
-
-      // Find the current section
       let currentSection = sections[0]?.id || '';
 
       for (const section of sections) {
@@ -30,13 +28,10 @@ export function SectionNav({ sections, className = '' }: SectionNavProps) {
           const sectionTop = element.offsetTop;
           const sectionBottom = sectionTop + element.offsetHeight;
 
-          // Check if we're within this section
           if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
             currentSection = section.id;
             break;
-          }
-          // If we've passed this section, it might be the active one
-          else if (scrollPosition >= sectionTop) {
+          } else if (scrollPosition >= sectionTop) {
             currentSection = section.id;
           }
         }
@@ -45,10 +40,7 @@ export function SectionNav({ sections, className = '' }: SectionNavProps) {
       setActiveSection(currentSection);
     };
 
-    // Check on mount
     handleScroll();
-
-    // Listen to scroll events
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [sections]);
@@ -56,12 +48,9 @@ export function SectionNav({ sections, className = '' }: SectionNavProps) {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      const offset = 120; // Account for sticky header
+      const offset = 120;
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      
-      // Set active immediately for better UX
       setActiveSection(sectionId);
-      
       window.scrollTo({
         top: elementPosition - offset,
         behavior: 'smooth',
@@ -71,6 +60,32 @@ export function SectionNav({ sections, className = '' }: SectionNavProps) {
 
   if (sections.length === 0) return null;
 
+  // Vertical Layout (Sidebar)
+  if (layout === 'vertical') {
+    return (
+      <div className={`space-y-1 ${className}`}>
+        {sections.map((section) => (
+          <button
+            key={section.id}
+            onClick={() => scrollToSection(section.id)}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 text-left ${
+              activeSection === section.id
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+            }`}
+          >
+            <span className="w-5 h-5 flex-shrink-0">{section.icon}</span>
+            <span className="flex-1">{section.label}</span>
+            {activeSection === section.id && (
+              <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+            )}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  // Horizontal Layout (Original)
   return (
     <div className={`bg-card/95 backdrop-blur-xl border border-border rounded-2xl shadow-lg ${className}`}>
       {/* Desktop: Horizontal */}
@@ -116,7 +131,6 @@ export function SectionNav({ sections, className = '' }: SectionNavProps) {
 export function generateDestinationSections(destination: Destination): Section[] {
   const sections: Section[] = [];
 
-  // Overview - always show if description exists
   if (destination.overview?.description) {
     sections.push({ 
       id: 'overview', 
@@ -125,7 +139,6 @@ export function generateDestinationSections(destination: Destination): Section[]
     });
   }
 
-  // What to See - show if highlights exist
   if (destination.whatToSee?.highlights && destination.whatToSee.highlights.length > 0) {
     sections.push({ 
       id: 'what-to-see', 
@@ -134,7 +147,6 @@ export function generateDestinationSections(destination: Destination): Section[]
     });
   }
 
-  // Best Time to Visit - show if season or description exists
   if (destination.bestTimeToVisit?.season || destination.bestTimeToVisit?.description) {
     sections.push({ 
       id: 'best-time', 
@@ -143,7 +155,6 @@ export function generateDestinationSections(destination: Destination): Section[]
     });
   }
 
-  // Things to Do - show if activities exist
   if (destination.thingsToDo?.activities && destination.thingsToDo.activities.length > 0) {
     sections.push({ 
       id: 'things-to-do', 
@@ -152,7 +163,6 @@ export function generateDestinationSections(destination: Destination): Section[]
     });
   }
 
-  // Travel Tips - show if tips exist
   if (destination.travelTips?.tips && destination.travelTips.tips.length > 0) {
     sections.push({ 
       id: 'travel-tips', 
@@ -161,7 +171,6 @@ export function generateDestinationSections(destination: Destination): Section[]
     });
   }
 
-  // History & Legend - show if description exists
   if (destination.historyAndLegend?.description || 
       destination.historyAndLegend?.historicalFacts || 
       destination.historyAndLegend?.legends) {
@@ -172,7 +181,6 @@ export function generateDestinationSections(destination: Destination): Section[]
     });
   }
 
-  // Nearby Places - always show last
   sections.push({ 
     id: 'nearby', 
     label: 'Nearby Places', 
