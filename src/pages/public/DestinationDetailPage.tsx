@@ -1,37 +1,47 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Calendar, Clock, DollarSign, CheckCircle, ArrowLeft, ChevronLeft, ChevronRight, Mountain, Eye, Lightbulb, BookOpen, ScrollText } from 'lucide-react';
+import { MapPin, Calendar, Clock, ArrowLeft, ChevronLeft, ChevronRight, Mountain, Eye, Lightbulb, CheckCircle, ScrollText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useData } from '@/contexts/DataContext';
 import { NearbyPlaces } from '@/components/public/NearbyPlaces';
 import { SectionNav, generateDestinationSections } from '@/components/public/SectionNav';
-import { Hotel, Restaurant } from '@/types';
+import { Destination, Hotel, Restaurant } from '@/types';
+
+const API_URL = 'http://localhost:5000/api';
 
 export function DestinationDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { destinations } = useData();
+  const [destination, setDestination] = useState<Destination | null>(null);
+  const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showStickyNav, setShowStickyNav] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
 
-  const destination = destinations.find(d => d.id === Number(id));
-
-  // Debug: Log destination data
+  // Fetch individual destination with nearby places
   useEffect(() => {
-    if (destination) {
-      console.log('📍 Destination Data:', destination);
-      console.log('📋 Overview:', destination.overview);
-      console.log('👀 What to See:', destination.whatToSee);
-      console.log('📅 Best Time:', destination.bestTimeToVisit);
-      console.log('🎯 Things to Do:', destination.thingsToDo);
-      console.log('💡 Travel Tips:', destination.travelTips);
-      console.log('📜 History:', destination.historyAndLegend);
+    const fetchDestination = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_URL}/destinations/${id}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setDestination(data.data);
+          console.log('📍 Destination with nearby places:', data.data);
+          console.log('🏨 Nearby Hotels:', data.data.nearbyHotels);
+          console.log('🍽️ Nearby Restaurants:', data.data.nearbyRestaurants);
+        }
+      } catch (error) {
+        console.error('Error fetching destination:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchDestination();
+      window.scrollTo(0, 0);
     }
-  }, [destination]);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
   }, [id]);
 
   // Handle sticky nav visibility
@@ -47,6 +57,16 @@ export function DestinationDetailPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">Loading destination...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!destination) {
     return (
       <div className="min-h-screen bg-background pt-20 flex items-center justify-center">
@@ -58,25 +78,13 @@ export function DestinationDetailPage() {
     );
   }
 
-  // Helper function to safely parse JSON if it's a string
-  const parseIfString = (data: any) => {
-    if (typeof data === 'string') {
-      try {
-        return JSON.parse(data);
-      } catch {
-        return null;
-      }
-    }
-    return data;
-  };
-
-  // Parse all sections
-  const overview = parseIfString(destination.overview);
-  const whatToSee = parseIfString(destination.whatToSee);
-  const bestTimeToVisit = parseIfString(destination.bestTimeToVisit);
-  const thingsToDo = parseIfString(destination.thingsToDo);
-  const travelTips = parseIfString(destination.travelTips);
-  const historyAndLegend = parseIfString(destination.historyAndLegend);
+  // Parse sections (they should already be objects from backend)
+  const overview = destination.overview;
+  const whatToSee = destination.whatToSee;
+  const bestTimeToVisit = destination.bestTimeToVisit;
+  const thingsToDo = destination.thingsToDo;
+  const travelTips = destination.travelTips;
+  const historyAndLegend = destination.historyAndLegend;
 
   // Build images array
   const images = [
@@ -211,7 +219,6 @@ export function DestinationDetailPage() {
               <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
                 {overview.description}
               </p>
-              {/* Show section images if they exist */}
               {overview.images && overview.images.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
                   {overview.images.map((img: string, i: number) => (
@@ -264,7 +271,6 @@ export function DestinationDetailPage() {
                   </div>
                 ))}
               </div>
-              {/* Show section images if they exist */}
               {whatToSee.images && whatToSee.images.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
                   {whatToSee.images.map((img: string, i: number) => (
@@ -326,7 +332,6 @@ export function DestinationDetailPage() {
                     </div>
                   )}
                 </div>
-                {/* Show section images if they exist */}
                 {bestTimeToVisit.images && bestTimeToVisit.images.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
                     {bestTimeToVisit.images.map((img: string, i: number) => (
@@ -382,7 +387,6 @@ export function DestinationDetailPage() {
                   </div>
                 ))}
               </div>
-              {/* Show section images if they exist */}
               {thingsToDo.images && thingsToDo.images.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
                   {thingsToDo.images.map((img: string, i: number) => (
@@ -423,7 +427,6 @@ export function DestinationDetailPage() {
                     </li>
                   ))}
                 </ul>
-                {/* Show section images if they exist */}
                 {travelTips.images && travelTips.images.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
                     {travelTips.images.map((img: string, i: number) => (
@@ -473,7 +476,6 @@ export function DestinationDetailPage() {
                     </p>
                   </div>
                 )}
-                {/* Show section images if they exist */}
                 {historyAndLegend.images && historyAndLegend.images.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
                     {historyAndLegend.images.map((img: string, i: number) => (
@@ -493,11 +495,7 @@ export function DestinationDetailPage() {
           {/* Nearby Places */}
           <section id="nearby" className="scroll-mt-32">
             <NearbyPlaces
-              destination={{
-                ...destination,
-                nearbyHotels: (destination as any).nearbyHotels,
-                nearbyRestaurants: (destination as any).nearbyRestaurants,
-              }}
+              destination={destination}
               onSelectHotel={handleSelectHotel}
               onSelectRestaurant={handleSelectRestaurant}
             />

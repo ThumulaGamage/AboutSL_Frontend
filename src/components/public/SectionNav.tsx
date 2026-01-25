@@ -18,17 +18,37 @@ export function SectionNav({ sections, className = '' }: SectionNavProps) {
 
   useEffect(() => {
     const handleScroll = () => {
+      // Get scroll position with offset for headers
       const scrollPosition = window.scrollY + 200;
 
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const element = document.getElementById(sections[i].id);
-        if (element && element.offsetTop <= scrollPosition) {
-          setActiveSection(sections[i].id);
-          break;
+      // Find the current section
+      let currentSection = sections[0]?.id || '';
+
+      for (const section of sections) {
+        const element = document.getElementById(section.id);
+        if (element) {
+          const sectionTop = element.offsetTop;
+          const sectionBottom = sectionTop + element.offsetHeight;
+
+          // Check if we're within this section
+          if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+            currentSection = section.id;
+            break;
+          }
+          // If we've passed this section, it might be the active one
+          else if (scrollPosition >= sectionTop) {
+            currentSection = section.id;
+          }
         }
       }
+
+      setActiveSection(currentSection);
     };
 
+    // Check on mount
+    handleScroll();
+
+    // Listen to scroll events
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [sections]);
@@ -36,14 +56,20 @@ export function SectionNav({ sections, className = '' }: SectionNavProps) {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      const offset = 100; // Account for sticky nav
+      const offset = 120; // Account for sticky header
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      
+      // Set active immediately for better UX
+      setActiveSection(sectionId);
+      
       window.scrollTo({
         top: elementPosition - offset,
         behavior: 'smooth',
       });
     }
   };
+
+  if (sections.length === 0) return null;
 
   return (
     <div className={`bg-card/95 backdrop-blur-xl border border-border rounded-2xl shadow-lg ${className}`}>
@@ -53,9 +79,9 @@ export function SectionNav({ sections, className = '' }: SectionNavProps) {
           <button
             key={section.id}
             onClick={() => scrollToSection(section.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300 ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 ${
               activeSection === section.id
-                ? 'bg-primary text-primary-foreground shadow-md'
+                ? 'bg-primary text-primary-foreground shadow-md scale-105'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             }`}
           >
@@ -71,9 +97,9 @@ export function SectionNav({ sections, className = '' }: SectionNavProps) {
           <button
             key={section.id}
             onClick={() => scrollToSection(section.id)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-300 ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 ${
               activeSection === section.id
-                ? 'bg-primary text-primary-foreground shadow-md'
+                ? 'bg-primary text-primary-foreground shadow-md scale-105'
                 : 'bg-muted text-muted-foreground'
             }`}
           >
@@ -146,7 +172,7 @@ export function generateDestinationSections(destination: Destination): Section[]
     });
   }
 
-  // Nearby Places - always show (component handles empty state)
+  // Nearby Places - always show last
   sections.push({ 
     id: 'nearby', 
     label: 'Nearby Places', 
