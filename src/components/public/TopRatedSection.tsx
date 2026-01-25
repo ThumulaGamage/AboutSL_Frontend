@@ -1,12 +1,12 @@
-import { MapPin, ArrowRight, Sparkles } from 'lucide-react';
+import { MapPin, ArrowRight, Sparkles, UtensilsCrossed } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useData } from '@/contexts/DataContext';
 import { useNavigate } from 'react-router-dom';
-import { Destination, Hotel } from '@/types';
+import { Destination, Hotel, Restaurant } from '@/types';
 
 interface TopRatedCardProps {
-  item: Destination | Hotel;
-  type: 'destination' | 'hotel';
+  item: Destination | Hotel | Restaurant;
+  type: 'destination' | 'hotel' | 'restaurant';
   index: number;
 }
 
@@ -16,8 +16,10 @@ function TopRatedCard({ item, type, index }: TopRatedCardProps) {
   const handleClick = () => {
     if (type === 'destination') {
       navigate(`/destinations/${item.id}`);
-    } else {
+    } else if (type === 'hotel') {
       navigate(`/stay-eat/hotels/${item.id}`);
+    } else {
+      navigate(`/stay-eat/restaurants/${item.id}`);
     }
   };
 
@@ -26,9 +28,12 @@ function TopRatedCard({ item, type, index }: TopRatedCardProps) {
     if (type === 'destination') {
       const dest = item as Destination;
       return dest.quickSummary || dest.overview?.description || dest.fullDescription?.slice(0, 100);
-    } else {
+    } else if (type === 'hotel') {
       const hotel = item as Hotel;
       return hotel.quickSummary || hotel.overview?.description || hotel.fullDescription?.slice(0, 100);
+    } else {
+      const restaurant = item as Restaurant;
+      return restaurant.quickSummary || restaurant.specialty || restaurant.fullDescription?.slice(0, 100);
     }
   };
 
@@ -38,8 +43,23 @@ function TopRatedCard({ item, type, index }: TopRatedCardProps) {
       const currency = hotel.currency || '$';
       const price = hotel.price || hotel.pricePerNight;
       return price ? `${currency}${price}` : null;
+    } else if (type === 'restaurant') {
+      const restaurant = item as Restaurant;
+      return restaurant.priceRange || '$$';
     }
     return null;
+  };
+
+  const getBadge = () => {
+    if (type === 'destination') return (item as Destination).category;
+    if (type === 'hotel') return (item as Hotel).category;
+    return (item as Restaurant).cuisine;
+  };
+
+  const getLocation = () => {
+    if (type === 'destination') return (item as Destination).region;
+    if (type === 'hotel') return (item as Hotel).location?.region || 'Sri Lanka';
+    return (item as Restaurant).location?.region || 'Sri Lanka';
   };
 
   return (
@@ -62,7 +82,7 @@ function TopRatedCard({ item, type, index }: TopRatedCardProps) {
         {/* Category Badge */}
         <div className="absolute top-4 left-4">
           <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/90 text-foreground backdrop-blur-sm capitalize">
-            {type === 'destination' ? (item as Destination).category : (item as Hotel).category}
+            {getBadge()}
           </span>
         </div>
 
@@ -73,10 +93,7 @@ function TopRatedCard({ item, type, index }: TopRatedCardProps) {
           </h3>
           <div className="flex items-center gap-1.5 text-white/80 text-sm">
             <MapPin className="w-3.5 h-3.5" />
-            {type === 'destination' 
-              ? (item as Destination).region 
-              : (item as Hotel).location?.region || 'Sri Lanka'
-            }
+            {getLocation()}
           </div>
         </div>
       </div>
@@ -94,6 +111,11 @@ function TopRatedCard({ item, type, index }: TopRatedCardProps) {
               <span className="text-sm text-muted-foreground font-normal">/night</span>
             </div>
           )}
+          {type === 'restaurant' && getPrice() && (
+            <div className="text-lg font-bold text-primary">
+              {getPrice()}
+            </div>
+          )}
           {type === 'destination' && (
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <Sparkles className="w-4 h-4 text-secondary" />
@@ -101,7 +123,7 @@ function TopRatedCard({ item, type, index }: TopRatedCardProps) {
             </div>
           )}
           <span className="text-primary text-sm font-medium group-hover:translate-x-1 transition-transform flex items-center gap-1">
-            Explore <ArrowRight className="w-4 h-4" />
+            {type === 'restaurant' ? 'View Menu' : 'Explore'} <ArrowRight className="w-4 h-4" />
           </span>
         </div>
       </div>
@@ -113,7 +135,7 @@ function TopRatedCard({ item, type, index }: TopRatedCardProps) {
 }
 
 export function TopRatedSection() {
-  const { destinations, hotels } = useData();
+  const { destinations, hotels, restaurants } = useData();
   const navigate = useNavigate();
 
   const topDestinations = destinations
@@ -122,6 +144,10 @@ export function TopRatedSection() {
 
   const topHotels = hotels
     .filter(h => h.status === 'active')
+    .slice(0, 4);
+
+  const topRestaurants = restaurants
+    .filter(r => r.status === 'active')
     .slice(0, 4);
 
   return (
@@ -224,6 +250,57 @@ export function TopRatedSection() {
             onClick={() => navigate('/stay-eat')}
           >
             View All Hotels & Stays <ArrowRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </section>
+
+      {/* Top Restaurants - Editorial Style */}
+      <section className="relative">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div>
+            <p className="text-accent font-semibold uppercase tracking-widest text-sm mb-4">✦ Where to Dine</p>
+            <h2 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1]">
+              FLAVORS OF
+              <span className="block text-muted-foreground/40">THE ISLAND.</span>
+            </h2>
+          </div>
+          <div className="max-w-md">
+            <p className="text-muted-foreground text-lg mb-4">
+              Savor authentic Sri Lankan cuisine and international flavors in carefully selected restaurants across the island.
+            </p>
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-foreground hover:text-accent font-semibold uppercase tracking-wider text-sm group"
+              onClick={() => navigate('/stay-eat?tab=restaurants')}
+            >
+              View All Restaurants
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {topRestaurants.map((restaurant, index) => (
+            <div 
+              key={restaurant.id}
+              className="opacity-0 animate-fade-in-up"
+              style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
+            >
+              <TopRatedCard 
+                item={restaurant} 
+                type="restaurant" 
+                index={index}
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 md:hidden">
+          <Button 
+            className="w-full gap-2 sunset-gradient text-white"
+            onClick={() => navigate('/stay-eat?tab=restaurants')}
+          >
+            View All Restaurants <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
       </section>
