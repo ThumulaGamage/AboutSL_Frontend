@@ -151,32 +151,11 @@ export function AdminLogin() {
             </Button>
           </form>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 rounded-lg bg-muted">
-            <p className="text-sm text-muted-foreground mb-2">Demo credentials:</p>
-            <div className="space-y-1">
-              <p className="text-sm font-mono text-foreground">admin@aboutsl.com</p>
-              <p className="text-sm font-mono text-foreground">admin123</p>
-            </div>
-          </div>
 
-          {/* Quick Fill Button */}
-          <div className="mt-4">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                setEmail('admin@aboutsl.com');
-                setPassword('admin123');
-              }}
-              disabled={isLoading}
-            >
-              Auto-fill Demo Credentials
-            </Button>
+        
           </div>
         </div>
       </div>
-    </div>
+    
   );
 }

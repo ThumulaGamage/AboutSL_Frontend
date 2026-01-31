@@ -4,7 +4,7 @@ import { MapPin, Calendar, Clock, ArrowLeft, Mountain, Eye, Lightbulb, CheckCirc
 import { Button } from '@/components/ui/button';
 import { Destination, Hotel, Restaurant } from '@/types';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://aboutsl.viukon.com/api';
 
 export function DestinationDetailPage() {
   const { id } = useParams();
