@@ -71,6 +71,8 @@ export function SectionNav({ sections, className = '', layout = 'horizontal' }: 
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 text-left ${
               activeSection === section.id
                 ? 'bg-primary text-primary-foreground shadow-md'
+
+                
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             }`}
           >

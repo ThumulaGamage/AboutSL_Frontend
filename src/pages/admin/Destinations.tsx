@@ -7,7 +7,17 @@ import { useData } from '@/contexts/DataContext';
 import { Destination } from '@/types';
 
 export function AdminDestinations() {
-  const { destinations, addDestination, updateDestination, deleteDestination, toggleDestinationStatus } = useData();
+  // ✅ FIXED: Get hotels and restaurants from useData
+  const { 
+    destinations, 
+    hotels,           // ✅ ADD THIS
+    restaurants,      // ✅ ADD THIS
+    addDestination, 
+    updateDestination, 
+    deleteDestination, 
+    toggleDestinationStatus 
+  } = useData();
+  
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingDestination, setEditingDestination] = useState<Destination | null>(null);
 
@@ -64,23 +74,23 @@ export function AdminDestinations() {
     setIsFormOpen(true);
   };
 
- const handleSave = async (destination: Partial<Destination>) => {
-  try {
-    if (editingDestination?.id) {
-      // Use the editingDestination.id instead of destination.id
-      await updateDestination(editingDestination.id, destination);
-    } else {
-      await addDestination(destination);
+  const handleSave = async (destination: Partial<Destination>) => {
+    try {
+      if (editingDestination?.id) {
+        // Use the editingDestination.id instead of destination.id
+        await updateDestination(editingDestination.id, destination);
+      } else {
+        await addDestination(destination);
+      }
+      
+      // Close form and reset on success
+      setIsFormOpen(false);
+      setEditingDestination(null);
+    } catch (error) {
+      // Error is already handled by DataContext with toast
+      console.error('Save error:', error);
     }
-    
-    // Close form and reset on success
-    setIsFormOpen(false);
-    setEditingDestination(null);
-  } catch (error) {
-    // Error is already handled by DataContext with toast
-    console.error('Save error:', error);
-  }
-};
+  };
 
   return (
     <AdminLayout>
@@ -101,6 +111,9 @@ export function AdminDestinations() {
           isOpen={isFormOpen}
           onClose={() => setIsFormOpen(false)}
           onSave={handleSave}
+          hotels={hotels}              // ✅ ADD THIS LINE
+          restaurants={restaurants}    // ✅ ADD THIS LINE
+          destinations={destinations}  // ✅ ADD THIS LINE
         />
       </div>
     </AdminLayout>

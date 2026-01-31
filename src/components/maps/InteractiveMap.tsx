@@ -28,6 +28,11 @@ const sriLankaBounds = {
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
+// ✅ HELPER: Get coordinates from either new or old structure
+const getCoordinates = (dest: Destination) => {
+  return dest.whereIsLocated?.coordinates || dest.location?.coordinates;
+};
+
 export function InteractiveMap({ destinations, selectedDestination, onMarkerClick }: InteractiveMapProps) {
   const [infoWindowDest, setInfoWindowDest] = useState<Destination | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
@@ -44,13 +49,17 @@ export function InteractiveMap({ destinations, selectedDestination, onMarkerClic
 
   // Center map on selected destination and show info window
   useEffect(() => {
-    if (selectedDestination && selectedDestination.location?.coordinates && mapRef.current) {
-      mapRef.current.panTo({
-        lat: selectedDestination.location.coordinates.lat,
-        lng: selectedDestination.location.coordinates.lng
-      });
-      mapRef.current.setZoom(11);
-      setInfoWindowDest(selectedDestination);
+    if (selectedDestination && mapRef.current) {
+      // ✅ UPDATED: Get coordinates from new or old structure
+      const coords = getCoordinates(selectedDestination);
+      if (coords?.lat && coords?.lng) {
+        mapRef.current.panTo({
+          lat: coords.lat,
+          lng: coords.lng
+        });
+        mapRef.current.setZoom(11);
+        setInfoWindowDest(selectedDestination);
+      }
     }
   }, [selectedDestination]);
 
@@ -64,10 +73,11 @@ export function InteractiveMap({ destinations, selectedDestination, onMarkerClic
     setInfoWindowDest(null);
   }, []);
 
-  // Filter destinations with valid coordinates
-  const validDestinations = destinations.filter(
-    d => d.location?.coordinates?.lat && d.location?.coordinates?.lng
-  );
+  // ✅ UPDATED: Filter destinations with valid coordinates (new or old structure)
+  const validDestinations = destinations.filter(d => {
+    const coords = getCoordinates(d);
+    return coords?.lat && coords?.lng;
+  });
 
   // Fallback to artistic map when no API key
   if (!GOOGLE_MAPS_API_KEY) {
@@ -134,13 +144,17 @@ export function InteractiveMap({ destinations, selectedDestination, onMarkerClic
       }}
     >
       {validDestinations.map((dest) => {
+        // ✅ UPDATED: Get coordinates from new or old structure
+        const coords = getCoordinates(dest);
+        if (!coords?.lat || !coords?.lng) return null;
+
         const isSelected = selectedDestination?.id === dest.id;
         return (
           <Marker
             key={dest.id}
             position={{
-              lat: dest.location.coordinates.lat!,
-              lng: dest.location.coordinates.lng!
+              lat: coords.lat,
+              lng: coords.lng
             }}
             onClick={() => handleMarkerClick(dest)}
             onMouseOver={() => setHoveredId(dest.id)}
@@ -160,39 +174,45 @@ export function InteractiveMap({ destinations, selectedDestination, onMarkerClic
         );
       })}
 
-      {infoWindowDest && infoWindowDest.location?.coordinates?.lat && (
-        <InfoWindow
-          position={{
-            lat: infoWindowDest.location.coordinates.lat,
-            lng: infoWindowDest.location.coordinates.lng!
-          }}
-          onCloseClick={handleInfoWindowClose}
-        >
-          <div className="p-1 max-w-[280px]">
-            <img
-              src={infoWindowDest.heroImage}
-              alt={infoWindowDest.name}
-              className="w-full h-32 object-cover rounded-lg mb-3"
-            />
-            <h3 className="font-semibold text-foreground text-lg mb-1">
-              {infoWindowDest.name}
-            </h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-              <MapPin className="w-3.5 h-3.5" />
-              {infoWindowDest.region}
+      {infoWindowDest && (() => {
+        // ✅ UPDATED: Get coordinates from new or old structure
+        const coords = getCoordinates(infoWindowDest);
+        if (!coords?.lat || !coords?.lng) return null;
+
+        return (
+          <InfoWindow
+            position={{
+              lat: coords.lat,
+              lng: coords.lng
+            }}
+            onCloseClick={handleInfoWindowClose}
+          >
+            <div className="p-1 max-w-[280px]">
+              <img
+                src={infoWindowDest.heroImage}
+                alt={infoWindowDest.name}
+                className="w-full h-32 object-cover rounded-lg mb-3"
+              />
+              <h3 className="font-semibold text-foreground text-lg mb-1">
+                {infoWindowDest.name}
+              </h3>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                <MapPin className="w-3.5 h-3.5" />
+                {infoWindowDest.region}
+              </div>
+              <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                {infoWindowDest.overview?.description || 'Explore this beautiful destination'}
+              </p>
+              <button
+                onClick={() => handleMarkerClick(infoWindowDest)}
+                className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                View Details
+              </button>
             </div>
-            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-              {infoWindowDest.overview?.description || 'Explore this beautiful destination'}
-            </p>
-            <button
-              onClick={() => handleMarkerClick(infoWindowDest)}
-              className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-            >
-              View Details
-            </button>
-          </div>
-        </InfoWindow>
-      )}
+          </InfoWindow>
+        );
+      })()}
     </GoogleMap>
   );
 }
@@ -231,12 +251,14 @@ function FallbackMap({ destinations, selectedDestination, onDestinationClick }: 
           />
 
           {destinations.map((dest) => {
-            if (!dest.location?.coordinates?.lat || !dest.location?.coordinates?.lng) return null;
+            // ✅ UPDATED: Get coordinates from new or old structure
+            const coords = getCoordinates(dest);
+            if (!coords?.lat || !coords?.lng) return null;
             
             const isSelected = selectedDestination?.id === dest.id;
             const pos = getPosition({
-              lat: dest.location.coordinates.lat,
-              lng: dest.location.coordinates.lng
+              lat: coords.lat,
+              lng: coords.lng
             });
             
             return (

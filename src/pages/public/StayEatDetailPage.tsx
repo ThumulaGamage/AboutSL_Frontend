@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, DollarSign, CheckCircle, ArrowLeft, ChevronLeft, ChevronRight, Clock, Phone, Globe, UtensilsCrossed, Bed } from 'lucide-react';
+import { MapPin, DollarSign, CheckCircle, ArrowLeft, ChevronLeft, ChevronRight, Phone, Globe, UtensilsCrossed, Bed } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useData } from '@/contexts/DataContext';
 import { Hotel, Restaurant } from '@/types';
@@ -34,12 +34,10 @@ export function StayEatDetailPage() {
   }
 
   // Build images array from heroImage and photoGallery
-  // Handle photoGallery whether it's a string (JSON), array, or undefined
   let galleryImages: string[] = [];
   
   if (item.photoGallery) {
     if (typeof item.photoGallery === 'string') {
-      // If it's a JSON string, parse it
       try {
         const parsed = JSON.parse(item.photoGallery);
         galleryImages = Array.isArray(parsed) 
@@ -49,7 +47,6 @@ export function StayEatDetailPage() {
         galleryImages = [];
       }
     } else if (Array.isArray(item.photoGallery)) {
-      // If it's already an array
       galleryImages = item.photoGallery.map(img => 
         typeof img === 'string' ? img : img.url
       ).filter(Boolean);
@@ -168,7 +165,6 @@ export function StayEatDetailPage() {
 
           {/* Hotel-specific sections */}
           {isHotel && hotel.amenities && (() => {
-            // Parse amenities if it's a JSON string
             let amenitiesList: any[] = [];
             if (typeof hotel.amenities === 'string') {
               try {
@@ -214,7 +210,6 @@ export function StayEatDetailPage() {
           )}
 
           {!isHotel && restaurant.menuHighlights && (() => {
-            // Parse menuHighlights if it's a JSON string
             let menuList: any[] = [];
             if (typeof restaurant.menuHighlights === 'string') {
               try {
@@ -264,7 +259,6 @@ export function StayEatDetailPage() {
 
           {/* Hours (Restaurant) */}
           {!isHotel && restaurant.hours && (() => {
-            // Parse hours if it's a JSON string
             let hoursObj: Record<string, string> = {};
             if (typeof restaurant.hours === 'string') {
               try {
@@ -297,7 +291,7 @@ export function StayEatDetailPage() {
           })()}
 
           {/* Contact Information */}
-          {item.contact && (
+          {(item.contact || item.websiteUrl) && (
             <section className="mb-12">
               <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-6">
                 Contact Information
@@ -313,7 +307,7 @@ export function StayEatDetailPage() {
                       </div>
                     </div>
                   )}
-                  {item.contact.phone && (
+                  {item.contact?.phone && (
                     <div className="flex items-start gap-3">
                       <Phone className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                       <div>
@@ -327,7 +321,7 @@ export function StayEatDetailPage() {
                       </div>
                     </div>
                   )}
-                  {item.contact.email && (
+                  {item.contact?.email && (
                     <div className="flex items-start gap-3">
                       <Globe className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                       <div>
@@ -341,20 +335,18 @@ export function StayEatDetailPage() {
                       </div>
                     </div>
                   )}
-                  {isHotel && hotel.contact?.website && (
-                    <div className="flex items-start gap-3">
-                      <Globe className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                      <div>
-                        <div className="font-medium text-foreground">Website</div>
-                        <a 
-                          href={hotel.contact.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-muted-foreground hover:text-primary transition-colors"
-                        >
-                          Visit Website
-                        </a>
-                      </div>
+                  
+                  {/* ✅ NEW: Official Website Button */}
+                  {item.websiteUrl && (
+                    <div className="pt-4 border-t border-border">
+                      <Button
+                        onClick={() => window.open(item.websiteUrl, '_blank', 'noopener,noreferrer')}
+                        className="w-full text-sm font-bold uppercase tracking-wider bg-foreground text-background hover:bg-foreground/90 text-primary-foreground"
+                        size="lg"
+                      >
+                        <Globe className="w-5 h-5" />
+                        Visit Official Website
+                      </Button>
                     </div>
                   )}
                 </div>

@@ -11,11 +11,12 @@ interface MapModalProps {
 
 export function MapModal({ isOpen, onClose, onSelectDestination }: MapModalProps) {
   const { destinations } = useData();
-  const activeDestinations = destinations.filter(d => 
-    d.status === 'active' && 
-    d.location?.coordinates?.lat && 
-    d.location?.coordinates?.lng
-  );
+  
+  // ✅ UPDATED: Check for new whereIsLocated field, fallback to old location field
+  const activeDestinations = destinations.filter(d => {
+    const coords = d.whereIsLocated?.coordinates || d.location?.coordinates;
+    return d.status === 'active' && coords?.lat && coords?.lng;
+  });
 
   // Sri Lanka map positions
   const getPosition = (coordinates: { lat: number; lng: number }) => {
@@ -31,6 +32,11 @@ export function MapModal({ isOpen, onClose, onSelectDestination }: MapModalProps
       left: `${Math.max(5, Math.min(95, x))}%`, 
       top: `${Math.max(5, Math.min(95, y))}%` 
     };
+  };
+
+  // ✅ HELPER: Get coordinates from either new or old structure
+  const getCoordinates = (dest: any) => {
+    return dest.whereIsLocated?.coordinates || dest.location?.coordinates;
   };
 
   return (
@@ -60,11 +66,13 @@ export function MapModal({ isOpen, onClose, onSelectDestination }: MapModalProps
             
             {/* Destination Markers */}
             {activeDestinations.map((dest) => {
-              if (!dest.location?.coordinates?.lat || !dest.location?.coordinates?.lng) return null;
+              // ✅ UPDATED: Get coordinates from new or old structure
+              const coords = getCoordinates(dest);
+              if (!coords?.lat || !coords?.lng) return null;
               
               const pos = getPosition({
-                lat: dest.location.coordinates.lat,
-                lng: dest.location.coordinates.lng
+                lat: coords.lat,
+                lng: coords.lng
               });
               
               return (

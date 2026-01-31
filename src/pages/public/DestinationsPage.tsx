@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Filter, MapPin } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useData } from '@/contexts/DataContext';
+import destinationHeader from '@/assets/destination.jpeg';
 
 export function DestinationsPage() {
   const { destinations } = useData();
@@ -38,18 +39,13 @@ export function DestinationsPage() {
 
   return (
     <div className="min-h-screen bg-background pt-20">
-      {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground py-24">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAtNGgydjJoLTJ2LTJ6bTAgNGgydjJoLTJ2LTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-10"></div>
-        <div className="container mx-auto px-4 text-center relative">
-          <p className="text-primary-foreground/80 font-semibold uppercase tracking-widest text-sm mb-4">✦ Discover</p>
-          <h1 className="font-display text-5xl md:text-7xl font-bold mb-6">
-            Explore Destinations
-          </h1>
-          <p className="text-primary-foreground/90 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-            Discover Sri Lanka's most breathtaking destinations, from ancient wonders to natural paradises
-          </p>
-        </div>
+      {/* Header with Image Only */}
+      <div className="relative overflow-hidden h-[300px] md:h-[400px]">
+        <img
+          src={destinationHeader}
+          alt="Sri Lanka Destinations"
+          className="w-full h-full object-cover"
+        />
       </div>
 
       {/* Filters */}

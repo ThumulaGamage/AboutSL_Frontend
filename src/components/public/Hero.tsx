@@ -69,13 +69,17 @@ export function Hero() {
             </div>
 
             {/* Logo Display */}
-            <div className="bg-card/10 backdrop-blur-sm rounded-2xl p-8 border border-primary-foreground/10">
-              <img 
-                src={logoGif} 
-                alt="AboutSL Logo" 
-                className="w-full h-auto brightness-0 invert opacity-90"
-              />
-            </div>
+<div className="bg-card/10 backdrop-blur-sm rounded-2xl p-8 border border-primary-foreground/10 flex justify-center">
+  <div className="w-28 sm:w-32 md:w-40 lg:w-48">
+    <img 
+      src={logoGif} 
+      alt="AboutSL Logo" 
+      className="w-full h-auto brightness-0 invert opacity-90"
+    />
+  </div>
+</div>
+
+
           </div>
         </div>
 

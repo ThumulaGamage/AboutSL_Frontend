@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, MapPin, X } from 'lucide-react';
+import { Plus, Trash2, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import { useData } from '@/contexts/DataContext';
-import { Hotel, Destination } from '@/types';
+import { Hotel } from '@/types';
 
 interface HotelFormProps {
   hotel?: Hotel | null;
@@ -17,7 +16,6 @@ interface HotelFormProps {
 }
 
 export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
-  const { destinations } = useData();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<{
     name?: string;
@@ -34,12 +32,7 @@ export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
     quickSummary?: string;
     fullDescription?: string;
     amenities?: string[];
-    nearbyDestinations?: Array<{
-      destinationId: number;
-      destinationName: string;
-      distance: number;
-      unit: string;
-    }>;
+    websiteUrl?: string; // ✅ NEW
     rating?: number;
     reviewCount?: number;
     status?: 'active' | 'inactive' | 'draft';
@@ -54,41 +47,32 @@ export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
     quickSummary: '',
     fullDescription: '',
     amenities: [],
-    nearbyDestinations: [],
+    websiteUrl: '', // ✅ NEW
     rating: 4.5,
     reviewCount: 0,
     status: 'active',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showDestinationSelector, setShowDestinationSelector] = useState(false);
-  const [selectedDestinationId, setSelectedDestinationId] = useState<number | ''>('');
-  const [distance, setDistance] = useState<string>('');
 
   useEffect(() => {
-    console.log('🔄 Hotel prop changed:', hotel);
-    
     if (hotel) {
       // Extract URLs from photoGallery objects
-      const photoUrls = (hotel.photoGallery || []).map(item => {
-        console.log('📸 Photo item:', item, 'Type:', typeof item);
-        return typeof item === 'string' ? item : item.url;
-      });
-      console.log('📸 Extracted photo URLs:', photoUrls);
+      const photoUrls = (hotel.photoGallery || []).map(item => 
+        typeof item === 'string' ? item : item.url
+      );
 
       // Extract names from amenities objects
-      const amenityNames = (hotel.amenities || []).map(item => {
-        console.log('🛎️ Amenity item:', item, 'Type:', typeof item);
-        return typeof item === 'string' ? item : item.name;
-      });
-      console.log('🛎️ Extracted amenity names:', amenityNames);
+      const amenityNames = (hotel.amenities || []).map(item => 
+        typeof item === 'string' ? item : item.name
+      );
 
       setFormData({
         ...hotel,
         location: hotel.location || { region: '', address: '', coordinates: { lat: 0, lng: 0 } },
         photoGallery: photoUrls,
         amenities: amenityNames,
-        nearbyDestinations: hotel.nearbyDestinations || [],
+        websiteUrl: hotel.websiteUrl || '', // ✅ NEW
       });
     } else {
       setFormData({
@@ -102,7 +86,7 @@ export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
         quickSummary: '',
         fullDescription: '',
         amenities: [],
-        nearbyDestinations: [],
+        websiteUrl: '', // ✅ NEW
         rating: 4.5,
         reviewCount: 0,
         status: 'active',
@@ -120,6 +104,15 @@ export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
     if (!formData.price || formData.price <= 0) newErrors.price = 'Valid price is required';
     if (!formData.heroImage?.trim()) newErrors.heroImage = 'Hero image URL is required';
     if (!formData.fullDescription?.trim()) newErrors.fullDescription = 'Full description is required';
+    
+    // ✅ NEW: Validate website URL if provided
+    if (formData.websiteUrl && formData.websiteUrl.trim()) {
+      try {
+        new URL(formData.websiteUrl);
+      } catch {
+        newErrors.websiteUrl = 'Please enter a valid URL (e.g., https://example.com)';
+      }
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -156,11 +149,8 @@ export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
         ...(hotel?.id && { id: hotel.id }),
         photoGallery: photoGalleryObjects,
         amenities: amenitiesObjects,
+        websiteUrl: formData.websiteUrl?.trim() || null, // ✅ NEW
       };
-
-      console.log('📤 SUBMITTING HOTEL DATA:', JSON.stringify(submitData, null, 2));
-      console.log('📸 Photo Gallery Objects:', photoGalleryObjects);
-      console.log('🛎️ Amenities Objects:', amenitiesObjects);
 
       await onSave(submitData);
       onClose();
@@ -171,41 +161,6 @@ export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
     }
   };
 
-  const addNearbyDestination = () => {
-    if (!selectedDestinationId || !distance) return;
-    
-    const dest = destinations.find(d => d.id === selectedDestinationId);
-    if (!dest) return;
-
-    const newNearby = {
-      destinationId: selectedDestinationId as number,
-      destinationName: dest.name,
-      distance: parseFloat(distance),
-      unit: 'km'
-    };
-
-    setFormData(prev => ({
-      ...prev,
-      nearbyDestinations: [...(prev.nearbyDestinations || []), newNearby]
-    }));
-
-    setSelectedDestinationId('');
-    setDistance('');
-    setShowDestinationSelector(false);
-  };
-
-  const removeNearbyDestination = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      nearbyDestinations: (prev.nearbyDestinations || []).filter((_, i) => i !== index)
-    }));
-  };
-
-  const availableDestinations = destinations.filter(d => 
-    d.status === 'active' && 
-    !(formData.nearbyDestinations || []).some(nd => nd.destinationId === d.id)
-  );
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -214,7 +169,7 @@ export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
             {hotel ? 'Edit Hotel' : 'Add New Hotel'}
           </DialogTitle>
           <DialogDescription>
-            Fill in the hotel details including nearby destinations
+            Fill in the hotel details
           </DialogDescription>
         </DialogHeader>
 
@@ -299,6 +254,24 @@ export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
                 }))}
                 placeholder="Full address"
               />
+            </div>
+
+            {/* ✅ NEW: Official Website */}
+            <div>
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                Official Website URL
+              </label>
+              <Input
+                value={formData.websiteUrl || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, websiteUrl: e.target.value }))}
+                placeholder="https://www.hotelwebsite.com"
+                className={errors.websiteUrl ? 'border-destructive' : ''}
+              />
+              {errors.websiteUrl && <p className="text-xs text-destructive mt-1">{errors.websiteUrl}</p>}
+              <p className="text-xs text-muted-foreground mt-1">
+                Enter the hotel's official website (optional)
+              </p>
             </div>
 
             <div className="flex items-center gap-4">
@@ -443,112 +416,6 @@ export function HotelForm({ hotel, isOpen, onClose, onSave }: HotelFormProps) {
               <Plus className="w-4 h-4" />
               Add Amenity
             </Button>
-          </div>
-
-          {/* Nearby Destinations */}
-          <div className="space-y-4 bg-orange-50 dark:bg-orange-950/20 p-4 rounded-lg">
-            <h3 className="font-semibold flex items-center gap-2">
-              <MapPin className="w-5 h-5" />
-              Nearby Destinations
-            </h3>
-            
-            {/* List of added destinations */}
-            <div className="space-y-2">
-              {(formData.nearbyDestinations || []).map((nearby, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                  <div>
-                    <div className="font-medium">{nearby.destinationName}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {nearby.distance} {nearby.unit} away
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeNearbyDestination(index)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-
-            {/* Add new destination */}
-            {!showDestinationSelector ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setShowDestinationSelector(true)}
-                disabled={availableDestinations.length === 0}
-                className="gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Add Nearby Destination
-              </Button>
-            ) : (
-              <div className="space-y-3 p-4 bg-white dark:bg-gray-900 rounded-lg border">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Select Destination</label>
-                  <Select
-                    value={selectedDestinationId.toString()}
-                    onValueChange={(value) => setSelectedDestinationId(Number(value))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a destination..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableDestinations.map(dest => (
-                        <SelectItem key={dest.id} value={dest.id.toString()}>
-                          {dest.name} ({dest.region})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Distance (km)</label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    value={distance}
-                    onChange={(e) => setDistance(e.target.value)}
-                    placeholder="e.g., 5.5"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={addNearbyDestination}
-                    disabled={!selectedDestinationId || !distance}
-                  >
-                    Add
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setShowDestinationSelector(false);
-                      setSelectedDestinationId('');
-                      setDistance('');
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {availableDestinations.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                No more destinations available to add
-              </p>
-            )}
           </div>
 
           {/* Actions */}

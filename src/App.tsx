@@ -28,6 +28,10 @@ import { AdminHotels } from "./pages/admin/Hotels";
 import { AdminRestaurants } from "./pages/admin/Restaurants";
 import NotFound from "./pages/NotFound";
 
+import { AdminHeroSlides } from '@/pages/admin/AdminHeroSlides';
+import { AdminAboutPage } from '@/pages/admin/AdminAboutPage';
+import { AdminContactPage } from '@/pages/admin/AdminContactPage';
+
 const queryClient = new QueryClient();
 
 const PublicLayout = ({ children }: { children: React.ReactNode }) => (
@@ -64,6 +68,12 @@ const App = () => (
                 <Route path="/admin/destinations" element={<ProtectedRoute><AdminDestinations /></ProtectedRoute>} />
                 <Route path="/admin/hotels" element={<ProtectedRoute><AdminHotels /></ProtectedRoute>} />
                 <Route path="/admin/restaurants" element={<ProtectedRoute><AdminRestaurants /></ProtectedRoute>} />
+                  <Route path="/admin/hero-slides" element={<ProtectedRoute><AdminHeroSlides /></ProtectedRoute>} />
+                   <Route path="/admin/about-page" element={<ProtectedRoute><AdminAboutPage /></ProtectedRoute>} />
+                    <Route path="/admin/contact-page" element={<ProtectedRoute><AdminContactPage /></ProtectedRoute>} />
+
+
+                
                 
                 {/* Catch-all */}
                 <Route path="*" element={<NotFound />} />

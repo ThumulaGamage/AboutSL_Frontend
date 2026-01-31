@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Compass, LayoutDashboard, MapPin, Hotel, UtensilsCrossed, LogOut, ExternalLink } from 'lucide-react';
+import { Compass, LayoutDashboard, MapPin, Hotel, UtensilsCrossed, LogOut, ExternalLink, ImageIcon, Info, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -23,6 +23,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/destinations', label: 'Destinations', icon: MapPin },
     { path: '/admin/hotels', label: 'Hotels', icon: Hotel },
     { path: '/admin/restaurants', label: 'Restaurants', icon: UtensilsCrossed },
+    // ✅ NEW SECTIONS
+    { path: '/admin/hero-slides', label: 'Hero Slideshow', icon: ImageIcon },
+    { path: '/admin/about-page', label: 'About Page', icon: Info },
+    { path: '/admin/contact-page', label: 'Contact Page', icon: Mail },
   ];
 
   return (
@@ -45,7 +49,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4">
+        <nav className="flex-1 p-4 overflow-y-auto">
           <ul className="space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;

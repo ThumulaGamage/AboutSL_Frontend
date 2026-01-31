@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, MapPin, X } from 'lucide-react';
+import { Plus, Trash2, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import { useData } from '@/contexts/DataContext';
-import { Restaurant, Destination } from '@/types';
+import { Restaurant } from '@/types';
 
 interface RestaurantFormProps {
   restaurant?: Restaurant | null;
@@ -17,7 +16,6 @@ interface RestaurantFormProps {
 }
 
 export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: RestaurantFormProps) {
-  const { destinations } = useData();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<{
     name?: string;
@@ -35,12 +33,7 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
     quickSummary?: string;
     fullDescription?: string;
     menuHighlights?: string[];
-    nearbyDestinations?: Array<{
-      destinationId: number;
-      destinationName: string;
-      distance: number;
-      unit: string;
-    }>;
+    websiteUrl?: string; // ✅ NEW
     rating?: number;
     reviewCount?: number;
     status?: 'active' | 'inactive' | 'draft';
@@ -56,16 +49,13 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
     quickSummary: '',
     fullDescription: '',
     menuHighlights: [],
-    nearbyDestinations: [],
+    websiteUrl: '', // ✅ NEW
     rating: 4.5,
     reviewCount: 0,
     status: 'active',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showDestinationSelector, setShowDestinationSelector] = useState(false);
-  const [selectedDestinationId, setSelectedDestinationId] = useState<number | ''>('');
-  const [distance, setDistance] = useState<string>('');
 
   useEffect(() => {
     if (restaurant) {
@@ -84,7 +74,7 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
         location: restaurant.location || { region: '', address: '', coordinates: { lat: 0, lng: 0 } },
         photoGallery: photoUrls,
         menuHighlights: menuItems,
-        nearbyDestinations: restaurant.nearbyDestinations || [],
+        websiteUrl: restaurant.websiteUrl || '', // ✅ NEW
       });
     } else {
       setFormData({
@@ -99,7 +89,7 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
         quickSummary: '',
         fullDescription: '',
         menuHighlights: [],
-        nearbyDestinations: [],
+        websiteUrl: '', // ✅ NEW
         rating: 4.5,
         reviewCount: 0,
         status: 'active',
@@ -119,6 +109,15 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
     if (!formData.price || formData.price <= 0) newErrors.price = 'Valid price is required';
     if (!formData.heroImage?.trim()) newErrors.heroImage = 'Hero image URL is required';
     if (!formData.fullDescription?.trim()) newErrors.fullDescription = 'Full description is required';
+    
+    // ✅ NEW: Validate website URL if provided
+    if (formData.websiteUrl && formData.websiteUrl.trim()) {
+      try {
+        new URL(formData.websiteUrl);
+      } catch {
+        newErrors.websiteUrl = 'Please enter a valid URL (e.g., https://example.com)';
+      }
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -156,9 +155,8 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
         ...(restaurant?.id && { id: restaurant.id }),
         photoGallery: photoGalleryObjects,
         menuHighlights: menuHighlightsObjects,
+        websiteUrl: formData.websiteUrl?.trim() || null, // ✅ NEW
       };
-
-      console.log('📤 Submitting restaurant data:', submitData);
 
       await onSave(submitData);
       onClose();
@@ -169,41 +167,6 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
     }
   };
 
-  const addNearbyDestination = () => {
-    if (!selectedDestinationId || !distance) return;
-    
-    const dest = destinations.find(d => d.id === selectedDestinationId);
-    if (!dest) return;
-
-    const newNearby = {
-      destinationId: selectedDestinationId as number,
-      destinationName: dest.name,
-      distance: parseFloat(distance),
-      unit: 'km'
-    };
-
-    setFormData(prev => ({
-      ...prev,
-      nearbyDestinations: [...(prev.nearbyDestinations || []), newNearby]
-    }));
-
-    setSelectedDestinationId('');
-    setDistance('');
-    setShowDestinationSelector(false);
-  };
-
-  const removeNearbyDestination = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      nearbyDestinations: (prev.nearbyDestinations || []).filter((_, i) => i !== index)
-    }));
-  };
-
-  const availableDestinations = destinations.filter(d => 
-    d.status === 'active' && 
-    !(formData.nearbyDestinations || []).some(nd => nd.destinationId === d.id)
-  );
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -212,7 +175,7 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
             {restaurant ? 'Edit Restaurant' : 'Add New Restaurant'}
           </DialogTitle>
           <DialogDescription>
-            Fill in the restaurant details including nearby destinations
+            Fill in the restaurant details
           </DialogDescription>
         </DialogHeader>
 
@@ -259,12 +222,8 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
                   <SelectContent>
                     <SelectItem value="Sri Lankan">Sri Lankan</SelectItem>
                     <SelectItem value="International">International</SelectItem>
-                 
-                    
                     <SelectItem value="Seafood">Seafood</SelectItem>
-                    
                     <SelectItem value="Vegetarian">Vegetarian</SelectItem>
-                    
                   </SelectContent>
                 </Select>
                 {errors.cuisine && <p className="text-xs text-destructive mt-1">{errors.cuisine}</p>}
@@ -320,6 +279,24 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
                 }))}
                 placeholder="Full address"
               />
+            </div>
+
+            {/* ✅ NEW: Official Website */}
+            <div>
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                Official Website URL
+              </label>
+              <Input
+                value={formData.websiteUrl || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, websiteUrl: e.target.value }))}
+                placeholder="https://www.restaurantwebsite.com"
+                className={errors.websiteUrl ? 'border-destructive' : ''}
+              />
+              {errors.websiteUrl && <p className="text-xs text-destructive mt-1">{errors.websiteUrl}</p>}
+              <p className="text-xs text-muted-foreground mt-1">
+                Enter the restaurant's official website (optional)
+              </p>
             </div>
 
             <div className="flex items-center gap-4">
@@ -464,110 +441,6 @@ export function RestaurantForm({ restaurant, isOpen, onClose, onSave }: Restaura
               <Plus className="w-4 h-4" />
               Add Menu Item
             </Button>
-          </div>
-
-          {/* Nearby Destinations */}
-          <div className="space-y-4 bg-orange-50 dark:bg-orange-950/20 p-4 rounded-lg">
-            <h3 className="font-semibold flex items-center gap-2">
-              <MapPin className="w-5 h-5" />
-              Nearby Destinations
-            </h3>
-            
-            <div className="space-y-2">
-              {(formData.nearbyDestinations || []).map((nearby, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-white dark:bg-gray-900 rounded-lg border">
-                  <div>
-                    <div className="font-medium">{nearby.destinationName}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {nearby.distance} {nearby.unit} away
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeNearbyDestination(index)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-
-            {!showDestinationSelector ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setShowDestinationSelector(true)}
-                disabled={availableDestinations.length === 0}
-                className="gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Add Nearby Destination
-              </Button>
-            ) : (
-              <div className="space-y-3 p-4 bg-white dark:bg-gray-900 rounded-lg border">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Select Destination</label>
-                  <Select
-                    value={selectedDestinationId.toString()}
-                    onValueChange={(value) => setSelectedDestinationId(Number(value))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a destination..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableDestinations.map(dest => (
-                        <SelectItem key={dest.id} value={dest.id.toString()}>
-                          {dest.name} ({dest.region})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Distance (km)</label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    value={distance}
-                    onChange={(e) => setDistance(e.target.value)}
-                    placeholder="e.g., 5.5"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={addNearbyDestination}
-                    disabled={!selectedDestinationId || !distance}
-                  >
-                    Add
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setShowDestinationSelector(false);
-                      setSelectedDestinationId('');
-                      setDistance('');
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {availableDestinations.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                No more destinations available to add
-              </p>
-            )}
           </div>
 
           {/* Actions */}
