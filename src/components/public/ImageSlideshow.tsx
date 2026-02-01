@@ -138,17 +138,17 @@ export function ImageSlideshow() {
                 </div>
 
                 {/* Title */}
-                <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-4 leading-tight drop-shadow-2xl">
+                <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 leading-tight drop-shadow-2xl">
                   {slide.title}
                 </h1>
                 
                 {/* Subtitle */}
-                <h2 className="text-2xl md:text-3xl lg:text-4xl text-white/95 mb-6 font-light">
+                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white/95 mb-6 font-light">
                   {slide.subtitle}
                 </h2>
 
                 {/* Description */}
-                <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl leading-relaxed">
+                <p className="text-base sm:text-lg md:text-xl text-white/80 mb-10 max-w-2xl leading-relaxed">
                   {slide.description}
                 </p>
 
@@ -157,16 +157,16 @@ export function ImageSlideshow() {
                   <div className="flex flex-wrap gap-4">
                     <Button 
                       size="lg" 
-                      className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-semibold px-8 py-6 text-base shadow-2xl hover:shadow-primary/50 transition-all hover:scale-105 group"
+                      className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-semibold px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base shadow-2xl hover:shadow-primary/50 transition-all hover:scale-105 group"
                       onClick={() => navigate('/destinations')}
                     >
                       Start Exploring
-                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                     <Button 
                       size="lg" 
                       variant="outline"
-                      className="bg-white/10 backdrop-blur-md border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/50 px-8 py-6 text-base shadow-2xl transition-all hover:scale-105"
+                      className="bg-white/10 backdrop-blur-md border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/50 px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base shadow-2xl transition-all hover:scale-105"
                       onClick={() => navigate('/about')}
                     >
                       Learn More
@@ -179,11 +179,11 @@ export function ImageSlideshow() {
         </div>
       </div>
 
-      {/* Navigation Arrows */}
+      {/* Navigation Arrows - Hidden on Mobile */}
       <button
         onClick={prevSlide}
         disabled={isAnimating}
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 p-3 md:p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all z-30 group disabled:opacity-50"
+        className="hidden md:block absolute left-4 md:left-8 top-1/2 -translate-y-1/2 p-3 md:p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all z-30 group disabled:opacity-50"
         aria-label="Previous slide"
       >
         <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:scale-110 transition-transform" />
@@ -191,7 +191,7 @@ export function ImageSlideshow() {
       <button
         onClick={nextSlide}
         disabled={isAnimating}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 p-3 md:p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all z-30 group disabled:opacity-50"
+        className="hidden md:block absolute right-4 md:right-8 top-1/2 -translate-y-1/2 p-3 md:p-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all z-30 group disabled:opacity-50"
         aria-label="Next slide"
       >
         <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:scale-110 transition-transform" />

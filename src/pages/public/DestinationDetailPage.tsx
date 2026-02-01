@@ -326,21 +326,14 @@ export function DestinationDetailPage() {
                 )}
 
                 <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-2xl p-8 max-w-4xl mx-auto">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 ">
                     {whereIsLocated.city && (
                       <div className="p-4 bg-card rounded-xl">
                         <div className="text-sm text-muted-foreground mb-1">City</div>
                         <div className="font-semibold text-foreground">{whereIsLocated.city}</div>
                       </div>
                     )}
-                    {whereIsLocated.coordinates && (
-                      <div className="p-4 bg-card rounded-xl">
-                        <div className="text-sm text-muted-foreground mb-1">Coordinates</div>
-                        <div className="font-mono text-sm text-foreground">
-                          {whereIsLocated.coordinates.lat}, {whereIsLocated.coordinates.lng}
-                        </div>
-                      </div>
-                    )}
+                    
                   </div>
                 </div>
 

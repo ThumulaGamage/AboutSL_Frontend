@@ -103,8 +103,12 @@ export function Navbar() {
         <div className={`md:hidden overflow-hidden transition-all duration-300 ${
           isOpen ? 'max-h-96 pb-4' : 'max-h-0'
         }`}>
-          <div className={`pt-2 border-t ${showTransparent ? 'border-white/20' : 'border-border'}`}>
-            <div className="flex flex-col gap-1">
+          <div className={`pt-2 border-t ${
+            showTransparent 
+              ? 'border-white/20 bg-black/80 backdrop-blur-xl -mx-4 px-4' 
+              : 'border-border'
+          }`}>
+            <div className="flex flex-col gap-1 py-2">
               {navLinks.map((link) => {
                 const isActive = location.pathname === link.path;
                 return (
