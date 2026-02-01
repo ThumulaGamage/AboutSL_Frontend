@@ -3,80 +3,92 @@ import { ChevronLeft, ChevronRight, Play, Pause, ArrowRight } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
-const slides = [
-  {
-    image: 'https://as1.ftcdn.net/v2/jpg/06/24/68/34/1000_F_624683436_GfMOP75j5LxBIBktl9KRrtqwiQoroh5K.jpg',
-    title: 'Ancient Wonders',
-    subtitle: 'Discover Sigiriya Rock Fortress',
-    description: 'Climb the legendary Lion Rock and explore 1,500-year-old frescoes',
-    badge: 'Historical Sites'
-  },
-  {
-   image: 'https://images.pexels.com/photos/27669330/pexels-photo-27669330.jpeg',
-title: 'Galle Fort',
-subtitle: 'Walk Through Colonial History',
-description: 'A UNESCO World Heritage site with cobblestone streets, ramparts, and timeless architecture',
-badge: 'Historic Landmark'
-  },
-  {
-    image: 'https://thumbs.dreamstime.com/b/sri-lankan-leopard-panthera-pardus-kotiya-big-spotted-cat-lying-tree-nature-habitat-yala-national-park-sri-lanka-67952131.jpg',
-    title: 'Wildlife Safari',
-    subtitle: 'Experience Yala National Park',
-    description: 'Home to the highest density of leopards in the world',
-    badge: 'Wildlife'
-  },
-  {
-image: 'https://images.unsplash.com/photo-1566296314736-6eaac1ca0cb9?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bnV3YXJhJTIwZWxpeWElMjBzcmklMjBsYW5rYXxlbnwwfHwwfHx8MA%3D%3D',
-title: 'Ella',
-subtitle: 'Discover the Heart of the Hills',
-description: 'Lush green valleys, waterfalls, and panoramic views in Sri Lanka’s hill country',
-badge: 'Hill Town'
-
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1678914906666-53bbe53fe468?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8anVuZ2xlJTIwYmVhY2h8ZW58MHx8MHx8fDA%3D',
-title: 'Jungle Beach',
-subtitle: 'Escape into Nature',
-description: 'A hidden tropical beach surrounded by lush jungle and turquoise waters',
-badge: 'Hidden Beach'
-
-  }
-];
+interface Slide {
+  id: number;
+  image: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  badge: string;
+  order: number;
+  status: string;
+}
 
 export function ImageSlideshow() {
+  const [slides, setSlides] = useState<Slide[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Fetch slides from API
   useEffect(() => {
-    if (isPaused) return;
+    const fetchSlides = async () => {
+      try {
+        const response = await fetch('/api/hero-slides');
+        const data = await response.json();
+        if (data.success && data.data) {
+          // Only show active slides
+          const activeSlides = data.data.filter((s: Slide) => s.status === 'active');
+          setSlides(activeSlides);
+        }
+      } catch (error) {
+        console.error('Error fetching hero slides:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSlides();
+  }, []);
+
+  useEffect(() => {
+    if (isPaused || slides.length === 0) return;
     const timer = setInterval(() => {
       nextSlide();
     }, 6000);
     return () => clearInterval(timer);
-  }, [currentSlide, isPaused]);
+  }, [currentSlide, isPaused, slides.length]);
 
   const nextSlide = () => {
-    if (isAnimating) return;
+    if (isAnimating || slides.length === 0) return;
     setIsAnimating(true);
     setCurrentSlide((prev) => (prev + 1) % slides.length);
     setTimeout(() => setIsAnimating(false), 800);
   };
 
   const prevSlide = () => {
-    if (isAnimating) return;
+    if (isAnimating || slides.length === 0) return;
     setIsAnimating(true);
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
     setTimeout(() => setIsAnimating(false), 800);
   };
 
   const goToSlide = (index: number) => {
-    if (isAnimating || index === currentSlide) return;
+    if (isAnimating || index === currentSlide || slides.length === 0) return;
     setIsAnimating(true);
     setCurrentSlide(index);
     setTimeout(() => setIsAnimating(false), 800);
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <section className="relative h-screen overflow-hidden bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </section>
+    );
+  }
+
+  // Show message if no slides
+  if (slides.length === 0) {
+    return (
+      <section className="relative h-screen overflow-hidden bg-black flex items-center justify-center">
+        <div className="text-white text-xl">No slides available</div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative h-screen overflow-hidden bg-black">
@@ -84,7 +96,7 @@ export function ImageSlideshow() {
       <div className="absolute inset-0">
         {slides.map((slide, index) => (
           <div
-            key={index}
+            key={slide.id}
             className={`absolute inset-0 transition-opacity duration-1000 ${
               index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
@@ -104,13 +116,13 @@ export function ImageSlideshow() {
         ))}
       </div>
 
-      {/* Content - Outside of slides map so it's always interactive */}
+      {/* Content */}
       <div className="relative z-20 h-full flex items-center">
         <div className="container mx-auto px-4 md:px-8">
           <div className="max-w-4xl">
             {slides.map((slide, index) => (
               <div
-                key={index}
+                key={slide.id}
                 className={`transition-all duration-700 ${
                   index === currentSlide 
                     ? 'opacity-100 translate-y-0 delay-300' 
@@ -140,7 +152,7 @@ export function ImageSlideshow() {
                   {slide.description}
                 </p>
 
-                {/* CTA Buttons - Fixed to always be clickable */}
+                {/* CTA Buttons */}
                 {index === currentSlide && (
                   <div className="flex flex-wrap gap-4">
                     <Button 

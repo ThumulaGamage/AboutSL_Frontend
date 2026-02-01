@@ -1,53 +1,71 @@
+import { useState, useEffect } from 'react';
 import { Compass, Users, Award, Heart, Globe, Camera, Shield, Sparkles } from 'lucide-react';
 import { stats } from '@/data/sampleData';
 import aboutHeader from '@/assets/About.png';
 
-const teamMembers = [
-  {
-    name: 'ABC',
-    role: 'Founder & CEO',
-    image: '',
-    bio: 'Travel enthusiast with 15+ years exploring Sri Lanka'
-  },
-  {
-    name: 'B',
-    role: 'Content Director',
-    image: '',
-  },
-  {
-    name: 'C',
-    role: 'Head of Partnerships',
-    image: '',
-  }
-];
+// Icon mapping for dynamic values
+const iconMap: Record<string, any> = {
+  Heart,
+  Shield,
+  Globe,
+  Sparkles,
+  Compass,
+  Users,
+  Award,
+  Camera
+};
 
-const values = [
-  {
-    icon: Heart,
-    title: 'Passion',
-    description: 'We love Sri Lanka and want to share its beauty with the world'
-  },
-  {
-    icon: Shield,
-    title: 'Trust',
-    description: 'All recommendations are verified and quality-assured'
-  },
-  {
-    icon: Globe,
-    title: 'Sustainability',
-    description: 'Promoting responsible and eco-friendly tourism'
-  },
-  {
-    icon: Sparkles,
-    title: 'Excellence',
-    description: 'Curating only the best experiences for travelers'
-  }
-];
+interface AboutPageData {
+  stats: Array<{ icon: string; value: string; label: string }>;
+  storyTitle: string;
+  storyParagraph1: string;
+  storyParagraph2: string;
+  storyParagraph3: string;
+  values: Array<{ icon: string; title: string; description: string }>;
+  teamMembers: Array<{ name: string; role: string; image: string; bio: string }>;
+}
 
 export function AboutPage() {
+  const [aboutData, setAboutData] = useState<AboutPageData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAboutPage = async () => {
+      try {
+        const response = await fetch('/api/about-page');
+        const data = await response.json();
+        if (data.success) {
+          setAboutData(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching about page:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAboutPage();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background pt-16 flex items-center justify-center">
+        <div className="text-xl text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!aboutData) {
+    return (
+      <div className="min-h-screen bg-background pt-16 flex items-center justify-center">
+        <div className="text-xl text-muted-foreground">Failed to load about page</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background pt-16">
-      {/* Header with Image Only */}
+      {/* Header with Image Only - Hardcoded */}
       <div className="relative overflow-hidden h-[300px] md:h-[500px]">
         <img
           src={aboutHeader}
@@ -56,10 +74,10 @@ export function AboutPage() {
         />
       </div>
 
-      {/* Stats */}
+      {/* Stats - From API */}
       <div className="container mx-auto px-4 -mt-12 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {stats.map((stat, index) => (
+          {aboutData.stats.map((stat, index) => (
             <div 
               key={stat.label}
               className="text-center p-6 bg-card rounded-xl border border-border shadow-card opacity-0 animate-fade-in-up"
@@ -73,41 +91,27 @@ export function AboutPage() {
         </div>
       </div>
 
-      {/* Our Story */}
+      {/* Our Story - From API */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-                Our Story
+                {aboutData.storyTitle}
               </h2>
               <div className="w-20 h-1 bg-secondary mx-auto rounded-full" />
             </div>
             
             <div className="prose prose-lg max-w-none text-muted-foreground">
-              <p className="mb-6">
-                AboutSL was born from a simple passion: to share the incredible beauty, rich culture, 
-                and warm hospitality of Sri Lanka with travelers from around the world. What started as 
-                a personal travel blog has grown into a comprehensive tourism platform trusted by thousands 
-                of visitors every year.
-              </p>
-              <p className="mb-6">
-                Sri Lanka, often called the "Pearl of the Indian Ocean," packs an incredible diversity 
-                of experiences into a compact island. From the ancient rock fortress of Sigiriya to the 
-                misty tea plantations of Nuwara Eliya, from thrilling wildlife safaris in Yala to the 
-                colonial charm of Galle Fort – there's something magical waiting around every corner.
-              </p>
-              <p>
-                Our mission is to make it easy for travelers to discover these hidden treasures. We 
-                carefully curate every destination, hotel, and restaurant on our platform, ensuring 
-                you get authentic, high-quality experiences that showcase the best of Sri Lanka.
-              </p>
+              <p className="mb-6">{aboutData.storyParagraph1}</p>
+              <p className="mb-6">{aboutData.storyParagraph2}</p>
+              <p>{aboutData.storyParagraph3}</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Our Values */}
+      {/* Our Values - From API */}
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -120,28 +124,31 @@ export function AboutPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map((value, index) => (
-              <div 
-                key={value.title}
-                className="p-6 bg-card rounded-xl border border-border text-center opacity-0 animate-fade-in-up"
-                style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
-              >
-                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <value.icon className="w-7 h-7 text-primary" />
+            {aboutData.values.map((value, index) => {
+              const IconComponent = iconMap[value.icon] || Heart;
+              return (
+                <div 
+                  key={value.title}
+                  className="p-6 bg-card rounded-xl border border-border text-center opacity-0 animate-fade-in-up"
+                  style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
+                >
+                  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <IconComponent className="w-7 h-7 text-primary" />
+                  </div>
+                  <h3 className="font-display text-xl font-semibold text-foreground mb-2">
+                    {value.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    {value.description}
+                  </p>
                 </div>
-                <h3 className="font-display text-xl font-semibold text-foreground mb-2">
-                  {value.title}
-                </h3>
-                <p className="text-muted-foreground text-sm">
-                  {value.description}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Team */}
+      {/* Team - From API */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -154,31 +161,41 @@ export function AboutPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {teamMembers.map((member, index) => (
+            {aboutData.teamMembers.map((member, index) => (
               <div 
                 key={member.name}
                 className="text-center opacity-0 animate-fade-in-up"
                 style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
               >
                 <div className="w-32 h-32 rounded-full overflow-hidden mx-auto mb-4 border-4 border-primary/20">
-                  <img
-                    src={member.image}
-                    alt={member.name}
-                    className="w-full h-full object-cover"
-                  />
+                  {member.image ? (
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                      <span className="text-4xl font-bold text-primary">
+                        {member.name.charAt(0)}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <h3 className="font-display text-xl font-semibold text-foreground mb-1">
                   {member.name}
                 </h3>
                 <div className="text-primary font-medium text-sm mb-2">{member.role}</div>
-                <p className="text-muted-foreground text-sm">{member.bio}</p>
+                {member.bio && (
+                  <p className="text-muted-foreground text-sm">{member.bio}</p>
+                )}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features */}
+      {/* Features - Static (keeping as is) */}
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">

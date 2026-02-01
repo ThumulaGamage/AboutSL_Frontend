@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Save, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, Save } from 'lucide-react';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,7 +29,6 @@ interface Value {
 interface AboutPageData {
   id?: number;
   headerImage: string;
-  headerImagePublicId?: string;
   stats: Stat[];
   storyTitle: string;
   storyParagraph1: string;
@@ -38,7 +38,10 @@ interface AboutPageData {
   teamMembers: TeamMember[];
 }
 
+type TabType = 'story' | 'stats' | 'values' | 'team';
+
 export function AdminAboutPage() {
+  const [activeTab, setActiveTab] = useState<TabType>('story');
   const [formData, setFormData] = useState<AboutPageData>({
     headerImage: '',
     stats: [
@@ -130,7 +133,6 @@ export function AdminAboutPage() {
     }));
   };
 
-  // Stat Functions
   const updateStat = (index: number, field: keyof Stat, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -140,7 +142,6 @@ export function AdminAboutPage() {
     }));
   };
 
-  // Value Functions
   const updateValue = (index: number, field: keyof Value, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -150,227 +151,297 @@ export function AdminAboutPage() {
     }));
   };
 
+  const tabs = [
+    { id: 'story', label: 'Our Story' },
+    { id: 'stats', label: 'Statistics' },
+    { id: 'values', label: 'Our Values' },
+    { id: 'team', label: 'Team Members' },
+  ];
+
   if (isLoading) {
-    return <div className="p-8">Loading...</div>;
+    return (
+      <AdminLayout>
+        <div className="p-8">Loading...</div>
+      </AdminLayout>
+    );
   }
 
   return (
-    <div className="p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="font-display text-3xl font-bold text-foreground mb-2">
-            About Page Settings
-          </h1>
-          <p className="text-muted-foreground">
-            Manage your about page content, team members, and company information
-          </p>
-        </div>
-        <Button onClick={handleSave} disabled={isSaving} size="lg" className="gap-2">
-          <Save className="w-4 h-4" />
-          {isSaving ? 'Saving...' : 'Save Changes'}
-        </Button>
-      </div>
-
-      <div className="space-y-8 max-w-5xl">
-        {/* Header Image */}
-        <div className="bg-card rounded-xl border border-border p-6">
-          <h2 className="font-semibold text-lg mb-4">Header Image</h2>
-          <div>
-            <Input
-              value={formData.headerImage}
-              onChange={(e) => setFormData(prev => ({ ...prev, headerImage: e.target.value }))}
-              placeholder="https://example.com/header.jpg"
-            />
-            {formData.headerImage && (
-              <img src={formData.headerImage} alt="Header" className="mt-4 h-32 rounded object-cover" />
-            )}
+    <AdminLayout>
+      <div className="flex h-screen">
+        {/* Left Sidebar - Tabs */}
+        <div className="w-64 bg-card border-r border-border p-4">
+          <div className="mb-6">
+            <h2 className="font-display text-xl font-bold text-foreground mb-1">
+              About Page
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Manage content sections
+            </p>
           </div>
-        </div>
 
-        {/* Stats */}
-        <div className="bg-card rounded-xl border border-border p-6">
-          <h2 className="font-semibold text-lg mb-4">Statistics (4 items)</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {formData.stats.map((stat, index) => (
-              <div key={index} className="p-4 bg-muted/30 rounded-lg space-y-3">
-                <div className="flex gap-2">
-                  <Input
-                    value={stat.icon}
-                    onChange={(e) => updateStat(index, 'icon', e.target.value)}
-                    placeholder="🏖️"
-                    className="w-20"
-                  />
-                  <Input
-                    value={stat.value}
-                    onChange={(e) => updateStat(index, 'value', e.target.value)}
-                    placeholder="1,340km"
-                  />
-                </div>
-                <Input
-                  value={stat.label}
-                  onChange={(e) => updateStat(index, 'label', e.target.value)}
-                  placeholder="Coastline"
-                />
-              </div>
+          <nav className="space-y-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as TabType)}
+                className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                  activeTab === tab.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
+              >
+                {tab.label}
+              </button>
             ))}
-          </div>
-        </div>
+          </nav>
 
-        {/* Our Story */}
-        <div className="bg-card rounded-xl border border-border p-6">
-          <h2 className="font-semibold text-lg mb-4">Our Story</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Section Title</label>
-              <Input
-                value={formData.storyTitle}
-                onChange={(e) => setFormData(prev => ({ ...prev, storyTitle: e.target.value }))}
-                placeholder="Our Story"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Paragraph 1</label>
-              <Textarea
-                value={formData.storyParagraph1}
-                onChange={(e) => setFormData(prev => ({ ...prev, storyParagraph1: e.target.value }))}
-                rows={4}
-                placeholder="First paragraph..."
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Paragraph 2</label>
-              <Textarea
-                value={formData.storyParagraph2}
-                onChange={(e) => setFormData(prev => ({ ...prev, storyParagraph2: e.target.value }))}
-                rows={4}
-                placeholder="Second paragraph..."
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">Paragraph 3</label>
-              <Textarea
-                value={formData.storyParagraph3}
-                onChange={(e) => setFormData(prev => ({ ...prev, storyParagraph3: e.target.value }))}
-                rows={4}
-                placeholder="Third paragraph..."
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Values */}
-        <div className="bg-card rounded-xl border border-border p-6">
-          <h2 className="font-semibold text-lg mb-4">Our Values (4 items)</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {formData.values.map((value, index) => (
-              <div key={index} className="p-4 bg-muted/30 rounded-lg space-y-3">
-                <Input
-                  value={value.icon}
-                  onChange={(e) => updateValue(index, 'icon', e.target.value)}
-                  placeholder="Heart"
-                />
-                <Input
-                  value={value.title}
-                  onChange={(e) => updateValue(index, 'title', e.target.value)}
-                  placeholder="Passion"
-                />
-                <Textarea
-                  value={value.description}
-                  onChange={(e) => updateValue(index, 'description', e.target.value)}
-                  rows={2}
-                  placeholder="Description..."
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Team Members */}
-        <div className="bg-card rounded-xl border border-border p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-lg">Team Members</h2>
-            <Button onClick={addTeamMember} variant="outline" size="sm" className="gap-2">
-              <Plus className="w-4 h-4" />
-              Add Team Member
+          <div className="mt-6 pt-6 border-t border-border">
+            <Button 
+              onClick={handleSave} 
+              disabled={isSaving} 
+              className="w-full gap-2 px-8 py-6 text-sm font-bold uppercase tracking-wider bg-foreground text-background hover:bg-foreground/90 rounded-full"
+            >
+              <Save className="w-4 h-4" />
+              {isSaving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
+        </div>
 
-          <div className="space-y-4">
-            {formData.teamMembers.map((member, index) => (
-              <div key={index} className="p-6 bg-muted/30 rounded-lg space-y-4 relative">
-                <Button
-                  onClick={() => removeTeamMember(index)}
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-2 right-2"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+        {/* Right Content Area */}
+        <div className="flex-1 overflow-y-auto p-8">
+          {/* Story Tab */}
+          {activeTab === 'story' && (
+            <div className="max-w-3xl space-y-6">
+              <div>
+                <h3 className="text-2xl font-bold mb-2">Our Story</h3>
+                <p className="text-muted-foreground">
+                  Edit the story section that appears on your About page
+                </p>
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Name</label>
-                    <Input
-                      value={member.name}
-                      onChange={(e) => updateTeamMember(index, 'name', e.target.value)}
-                      placeholder="John Doe"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Role</label>
-                    <Input
-                      value={member.role}
-                      onChange={(e) => updateTeamMember(index, 'role', e.target.value)}
-                      placeholder="Founder & CEO"
-                    />
-                  </div>
-                </div>
-
+              <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Image URL</label>
+                  <label className="text-sm font-medium mb-2 block">Section Title</label>
                   <Input
-                    value={member.image}
-                    onChange={(e) => updateTeamMember(index, 'image', e.target.value)}
-                    placeholder="https://example.com/photo.jpg"
+                    value={formData.storyTitle}
+                    onChange={(e) => setFormData(prev => ({ ...prev, storyTitle: e.target.value }))}
+                    placeholder="Our Story"
                   />
-                  {member.image && (
-                    <img 
-                      src={member.image} 
-                      alt={member.name} 
-                      className="mt-2 w-24 h-24 rounded-full object-cover" 
-                    />
-                  )}
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Bio</label>
+                  <label className="text-sm font-medium mb-2 block">Paragraph 1</label>
                   <Textarea
-                    value={member.bio}
-                    onChange={(e) => updateTeamMember(index, 'bio', e.target.value)}
-                    rows={3}
-                    placeholder="Brief bio about the team member..."
+                    value={formData.storyParagraph1}
+                    onChange={(e) => setFormData(prev => ({ ...prev, storyParagraph1: e.target.value }))}
+                    rows={5}
+                    placeholder="First paragraph of your story..."
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Paragraph 2</label>
+                  <Textarea
+                    value={formData.storyParagraph2}
+                    onChange={(e) => setFormData(prev => ({ ...prev, storyParagraph2: e.target.value }))}
+                    rows={5}
+                    placeholder="Second paragraph of your story..."
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Paragraph 3</label>
+                  <Textarea
+                    value={formData.storyParagraph3}
+                    onChange={(e) => setFormData(prev => ({ ...prev, storyParagraph3: e.target.value }))}
+                    rows={5}
+                    placeholder="Third paragraph of your story..."
                   />
                 </div>
               </div>
-            ))}
+            </div>
+          )}
 
-            {formData.teamMembers.length === 0 && (
-              <p className="text-muted-foreground text-center py-8">
-                No team members added yet. Click "Add Team Member" to get started.
-              </p>
-            )}
-          </div>
-        </div>
+          {/* Stats Tab */}
+          {activeTab === 'stats' && (
+            <div className="max-w-3xl space-y-6">
+              <div>
+                <h3 className="text-2xl font-bold mb-2">Statistics</h3>
+                <p className="text-muted-foreground">
+                  Manage the 4 statistics displayed on your About page
+                </p>
+              </div>
 
-        {/* Save Button (Bottom) */}
-        <div className="flex justify-end">
-          <Button onClick={handleSave} disabled={isSaving} size="lg" className="gap-2">
-            <Save className="w-4 h-4" />
-            {isSaving ? 'Saving...' : 'Save All Changes'}
-          </Button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {formData.stats.map((stat, index) => (
+                  <div key={index} className="p-4 bg-muted/30 rounded-lg space-y-3">
+                    <div className="flex gap-2">
+                      <div className="w-20">
+                        <label className="text-xs font-medium mb-1 block">Icon</label>
+                        <Input
+                          value={stat.icon}
+                          onChange={(e) => updateStat(index, 'icon', e.target.value)}
+                          placeholder="🏖️"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-xs font-medium mb-1 block">Value</label>
+                        <Input
+                          value={stat.value}
+                          onChange={(e) => updateStat(index, 'value', e.target.value)}
+                          placeholder="1,340km"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium mb-1 block">Label</label>
+                      <Input
+                        value={stat.label}
+                        onChange={(e) => updateStat(index, 'label', e.target.value)}
+                        placeholder="Coastline"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Values Tab */}
+          {activeTab === 'values' && (
+            <div className="max-w-3xl space-y-6">
+              <div>
+                <h3 className="text-2xl font-bold mb-2">Our Values</h3>
+                <p className="text-muted-foreground">
+                  Manage the 4 core values displayed on your About page
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {formData.values.map((value, index) => (
+                  <div key={index} className="p-4 bg-muted/30 rounded-lg space-y-3">
+                    <div>
+                      <label className="text-xs font-medium mb-1 block">Icon Name</label>
+                      <Input
+                        value={value.icon}
+                        onChange={(e) => updateValue(index, 'icon', e.target.value)}
+                        placeholder="Heart"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Lucide icon name (e.g., Heart, Shield, Globe, Sparkles)
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium mb-1 block">Title</label>
+                      <Input
+                        value={value.title}
+                        onChange={(e) => updateValue(index, 'title', e.target.value)}
+                        placeholder="Passion"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium mb-1 block">Description</label>
+                      <Textarea
+                        value={value.description}
+                        onChange={(e) => updateValue(index, 'description', e.target.value)}
+                        rows={3}
+                        placeholder="Description..."
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Team Members Tab */}
+          {activeTab === 'team' && (
+            <div className="max-w-3xl space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">Team Members</h3>
+                  <p className="text-muted-foreground">
+                    Add and manage your team members
+                  </p>
+                </div>
+                <Button onClick={addTeamMember} className="gap-2 px-6 py-4 text-sm font-bold uppercase tracking-wider bg-foreground text-background hover:bg-foreground/90 rounded-full">
+                  <Plus className="w-4 h-4" />
+                  Add Member
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {formData.teamMembers.map((member, index) => (
+                  <div key={index} className="p-6 bg-muted/30 rounded-lg space-y-4 relative">
+                    <Button
+                      onClick={() => removeTeamMember(index)}
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Name</label>
+                        <Input
+                          value={member.name}
+                          onChange={(e) => updateTeamMember(index, 'name', e.target.value)}
+                          placeholder="John Doe"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">Role</label>
+                        <Input
+                          value={member.role}
+                          onChange={(e) => updateTeamMember(index, 'role', e.target.value)}
+                          placeholder="Founder & CEO"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Image URL</label>
+                      <Input
+                        value={member.image}
+                        onChange={(e) => updateTeamMember(index, 'image', e.target.value)}
+                        placeholder="https://example.com/photo.jpg"
+                      />
+                      {member.image && (
+                        <img 
+                          src={member.image} 
+                          alt={member.name} 
+                          className="mt-2 w-24 h-24 rounded-full object-cover" 
+                        />
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Bio</label>
+                      <Textarea
+                        value={member.bio}
+                        onChange={(e) => updateTeamMember(index, 'bio', e.target.value)}
+                        rows={3}
+                        placeholder="Brief bio about the team member..."
+                      />
+                    </div>
+                  </div>
+                ))}
+
+                {formData.teamMembers.length === 0 && (
+                  <div className="text-center py-12 bg-muted/30 rounded-xl">
+                    <p className="text-muted-foreground">
+                      No team members added yet. Click "Add Member" to get started.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Mail,
   Phone,
@@ -15,7 +15,22 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import contactHeader from '@/assets/contact.png';
 
+interface ContactPageData {
+  email: string[];
+  phone: string[];
+  address: string[];
+  whatsapp: string;
+  facebook: string;
+  instagram: string;
+  twitter: string;
+  businessHours: Array<{ day: string; time: string }>;
+  timezone: string;
+}
+
 export function ContactPage() {
+  const [contactData, setContactData] = useState<ContactPageData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,6 +38,24 @@ export function ContactPage() {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchContactPage = async () => {
+      try {
+        const response = await fetch('/api/contact-page');
+        const data = await response.json();
+        if (data.success) {
+          setContactData(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching contact page:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchContactPage();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,9 +78,25 @@ export function ContactPage() {
     }));
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background pt-20 flex items-center justify-center">
+        <div className="text-xl text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!contactData) {
+    return (
+      <div className="min-h-screen bg-background pt-20 flex items-center justify-center">
+        <div className="text-xl text-muted-foreground">Failed to load contact page</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background pt-20">
-      {/* Header with Image Only */}
+      {/* Header with Image Only - Hardcoded */}
       <div className="relative overflow-hidden h-[300px] md:h-[500px]">
         <img
           src={contactHeader}
@@ -142,7 +191,7 @@ export function ContactPage() {
             </form>
           </div>
 
-          {/* Contact Info */}
+          {/* Contact Info - From API */}
           <div className="space-y-8">
             {/* Details */}
             <div
@@ -154,33 +203,41 @@ export function ContactPage() {
               </h2>
 
               <div className="space-y-6">
-                <InfoItem
-                  icon={<Mail className="w-6 h-6 text-primary" />}
-                  title="Email"
-                  lines={['hello@aboutsl.com', 'support@aboutsl.com']}
-                />
+                {contactData.email && contactData.email.length > 0 && (
+                  <InfoItem
+                    icon={<Mail className="w-6 h-6 text-primary" />}
+                    title="Email"
+                    lines={contactData.email}
+                  />
+                )}
 
-                <InfoItem
-                  icon={<Phone className="w-6 h-6 text-primary" />}
-                  title="Phone"
-                  lines={['+94 11 234 5678', '+94 77 123 4567']}
-                />
+                {contactData.phone && contactData.phone.length > 0 && (
+                  <InfoItem
+                    icon={<Phone className="w-6 h-6 text-primary" />}
+                    title="Phone"
+                    lines={contactData.phone}
+                  />
+                )}
 
-                <InfoItem
-                  icon={<MapPin className="w-6 h-6 text-primary" />}
-                  title="Address"
-                  lines={['42 Galle Road, Colombo 03', 'Sri Lanka']}
-                />
+                {contactData.address && contactData.address.length > 0 && (
+                  <InfoItem
+                    icon={<MapPin className="w-6 h-6 text-primary" />}
+                    title="Address"
+                    lines={contactData.address}
+                  />
+                )}
 
-                <InfoItem
-                  icon={<MessageCircle className="w-6 h-6 text-primary" />}
-                  title="WhatsApp"
-                  lines={['+94 77 123 4567']}
-                />
+                {contactData.whatsapp && (
+                  <InfoItem
+                    icon={<MessageCircle className="w-6 h-6 text-primary" />}
+                    title="WhatsApp"
+                    lines={[contactData.whatsapp]}
+                  />
+                )}
               </div>
             </div>
 
-            {/* Social */}
+            {/* Social - From API */}
             <div
               className="bg-card rounded-2xl border border-border p-8 opacity-0 animate-fade-in-up"
               style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}
@@ -190,13 +247,19 @@ export function ContactPage() {
               </h2>
 
               <div className="flex gap-4">
-                <SocialIcon icon={<Facebook />} />
-                <SocialIcon icon={<Instagram />} />
-                <SocialIcon icon={<Twitter />} />
+                {contactData.facebook && (
+                  <SocialIcon icon={<Facebook />} href={contactData.facebook} />
+                )}
+                {contactData.instagram && (
+                  <SocialIcon icon={<Instagram />} href={contactData.instagram} />
+                )}
+                {contactData.twitter && (
+                  <SocialIcon icon={<Twitter />} href={contactData.twitter} />
+                )}
               </div>
             </div>
 
-            {/* Business Hours */}
+            {/* Business Hours - From API */}
             <div
               className="bg-card rounded-2xl border border-border p-8 opacity-0 animate-fade-in-up"
               style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}
@@ -206,14 +269,16 @@ export function ContactPage() {
               </h2>
 
               <div className="space-y-3">
-                <HourRow day="Monday - Friday" time="9:00 AM - 6:00 PM" />
-                <HourRow day="Saturday" time="10:00 AM - 4:00 PM" />
-                <HourRow day="Sunday" time="Closed" />
+                {contactData.businessHours.map((hour, index) => (
+                  <HourRow key={index} day={hour.day} time={hour.time} />
+                ))}
               </div>
 
-              <p className="text-sm text-muted-foreground mt-4">
-                * Sri Lanka Standard Time (UTC +5:30)
-              </p>
+              {contactData.timezone && (
+                <p className="text-sm text-muted-foreground mt-4">
+                  * {contactData.timezone}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -242,10 +307,12 @@ function InfoItem({ icon, title, lines }: any) {
   );
 }
 
-function SocialIcon({ icon }: any) {
+function SocialIcon({ icon, href }: any) {
   return (
     <a
-      href="#"
+      href={href || '#'}
+      target="_blank"
+      rel="noopener noreferrer"
       className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
     >
       {icon}

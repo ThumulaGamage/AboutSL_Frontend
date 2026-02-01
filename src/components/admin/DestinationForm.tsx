@@ -1358,6 +1358,75 @@ export function DestinationForm({
             </div>
           </div>
 
+           {/* SECTION 10: Travel Tips */}
+          <div className="space-y-4 bg-orange-50 dark:bg-orange-950/20 p-4 rounded-lg border-l-4 border-orange-500">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              🔟 Travel Tips
+            </h3>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <Textarea
+                value={formData.travelTips.description}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  travelTips: { ...formData.travelTips, description: e.target.value }
+                })}
+                placeholder="General tips..."
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Tips (one per line)</label>
+              <Textarea
+                value={formData.travelTips.tips.join('\n')}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  travelTips: { ...formData.travelTips, tips: e.target.value.split('\n').filter(t => t.trim()) }
+                })}
+                placeholder="Start early morning&#10;Wear comfortable shoes&#10;Bring water"
+                rows={4}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Images</label>
+              {formData.travelTips.images.map((img, index) => (
+                <div key={index} className="flex gap-2 mb-2">
+                  <Input
+                    value={img.url}
+                    onChange={(e) => updateImage('travelTips', index, 'url', e.target.value)}
+                    placeholder="Image URL"
+                    className="flex-1"
+                  />
+                  <Input
+                    value={img.caption}
+                    onChange={(e) => updateImage('travelTips', index, 'caption', e.target.value)}
+                    placeholder="Caption"
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => removeImage('travelTips', index)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => addImage('travelTips')}
+              >
+                <Plus className="w-4 h-4 mr-2" /> Add Image
+              </Button>
+            </div>
+          </div>
+
           {/* SECTION 8: Where to Stay (NEW) */}
           <div className="space-y-4 bg-indigo-50 dark:bg-indigo-950/20 p-4 rounded-lg border-l-4 border-indigo-500">
             <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -1658,74 +1727,7 @@ export function DestinationForm({
             </div>
           </div>
 
-          {/* SECTION 10: Travel Tips */}
-          <div className="space-y-4 bg-orange-50 dark:bg-orange-950/20 p-4 rounded-lg border-l-4 border-orange-500">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              🔟 Travel Tips
-            </h3>
-            
-            <div>
-              <label className="block text-sm font-medium mb-1">Description</label>
-              <Textarea
-                value={formData.travelTips.description}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  travelTips: { ...formData.travelTips, description: e.target.value }
-                })}
-                placeholder="General tips..."
-                rows={2}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Tips (one per line)</label>
-              <Textarea
-                value={formData.travelTips.tips.join('\n')}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  travelTips: { ...formData.travelTips, tips: e.target.value.split('\n').filter(t => t.trim()) }
-                })}
-                placeholder="Start early morning&#10;Wear comfortable shoes&#10;Bring water"
-                rows={4}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Images</label>
-              {formData.travelTips.images.map((img, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <Input
-                    value={img.url}
-                    onChange={(e) => updateImage('travelTips', index, 'url', e.target.value)}
-                    placeholder="Image URL"
-                    className="flex-1"
-                  />
-                  <Input
-                    value={img.caption}
-                    onChange={(e) => updateImage('travelTips', index, 'caption', e.target.value)}
-                    placeholder="Caption"
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => removeImage('travelTips', index)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => addImage('travelTips')}
-              >
-                <Plus className="w-4 h-4 mr-2" /> Add Image
-              </Button>
-            </div>
-          </div>
+         
 
           {/* SECTION 11: Nearby Destinations (NEW) */}
           <div className="space-y-4 bg-teal-50 dark:bg-teal-950/20 p-4 rounded-lg border-l-4 border-teal-500">

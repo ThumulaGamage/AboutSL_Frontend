@@ -47,8 +47,8 @@ export function DestinationDetailPage() {
     const handleScroll = () => {
       const sections = [
         'overview', 'history', 'where-located', 'how-to-go', 'what-to-see', 
-        'best-time', 'things-to-do', 'where-to-stay', 'where-to-eat', 
-        'travel-tips', 'nearby-destinations'
+        'best-time', 'things-to-do','travel-tips', 'where-to-stay', 'where-to-eat', 
+         'nearby-destinations'
       ];
       const scrollPosition = window.scrollY + 200;
 
@@ -124,9 +124,10 @@ export function DestinationDetailPage() {
   if (whatToSee?.highlights?.length) sections.push({ id: 'what-to-see', label: 'What to See', icon: <Eye className="w-4 h-4" /> });
   if (bestTimeToVisit?.seasons?.length) sections.push({ id: 'best-time', label: 'Best Time to Visit', icon: <Calendar className="w-4 h-4" /> });
   if (thingsToDo?.activities?.length) sections.push({ id: 'things-to-do', label: 'Things to Do', icon: <Mountain className="w-4 h-4" /> });
+   if (travelTips?.tips?.length) sections.push({ id: 'travel-tips', label: 'Travel Tips', icon: <Lightbulb className="w-4 h-4" /> });
   if (whereToStay?.hotelsDetails?.length) sections.push({ id: 'where-to-stay', label: 'Where to Stay', icon: <HotelIcon className="w-4 h-4" /> });
   if (whereToEat?.restaurantsDetails?.length) sections.push({ id: 'where-to-eat', label: 'Where to Eat', icon: <UtensilsCrossed className="w-4 h-4" /> });
-  if (travelTips?.tips?.length) sections.push({ id: 'travel-tips', label: 'Travel Tips', icon: <Lightbulb className="w-4 h-4" /> });
+ 
   if (nearbyDestinations?.destinationsDetails?.length) sections.push({ id: 'nearby-destinations', label: 'Nearby Destinations', icon: <Compass className="w-4 h-4" /> });
 
   return (
@@ -203,712 +204,752 @@ export function DestinationDetailPage() {
           </div>
         </aside>
 
-        {/* Main Content */}
-        <div className="flex-1 flex justify-center px-4 md:px-8 py-12 md:py-20">
-          <div className="w-full max-w-7xl flex justify-start">
-            <div className="w-full max-w-3xl lg:ml-0 lg:mr-auto lg:pr-24">
+        {/* Main Content - CENTERED */}
+        <div className="flex-1 px-4 md:px-8 py-12 md:py-20">
+          <div className="max-w-6xl mx-auto">
 
-              {/* SECTION 1: Overview */}
-              {overview?.description && (
-                <section id="overview" className="mb-20 scroll-mt-24">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 rounded-xl bg-primary/10">
-                      <Eye className="w-6 h-6 text-primary" />
-                    </div>
-                    <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-                      Overview
-                    </h2>
+            {/* SECTION 1: Overview */}
+            {overview?.description && (
+              <section id="overview" className="mb-20 scroll-mt-24">
+                {/* Centered Heading */}
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  <div className="p-3 rounded-xl bg-primary/10">
+                    <Eye className="w-6 h-6 text-primary" />
                   </div>
-                  <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line mb-8">
-                    {overview.description}
-                  </p>
-                  {overview.images && overview.images.length > 0 && (
-                    <div className="space-y-6">
-                      {overview.images.map((img: any, i: number) => (
-                        <div key={i}>
-                          <img
-                            src={img.url}
-                            alt={img.caption || `Overview ${i + 1}`}
-                            className="w-full h-[400px] md:h-[500px] object-cover rounded-2xl"
-                          />
-                          {img.caption && (
-                            <p className="text-sm text-muted-foreground mt-2 text-center italic">
-                              {img.caption}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              )}
+                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+                    Overview
+                  </h2>
+                </div>
 
-              {/* SECTION 2: History & Legend */}
-              {(historyAndLegend?.description || historyAndLegend?.historicalFacts || historyAndLegend?.legends) && (
-                <section id="history" className="mb-20 scroll-mt-24">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 rounded-xl bg-accent/10">
-                      <ScrollText className="w-6 h-6 text-accent" />
-                    </div>
-                    <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-                      History & Legend
-                    </h2>
-                  </div>
-                  <div className="bg-gradient-to-br from-accent/5 to-transparent rounded-2xl p-6 md:p-8 border border-accent/10">
-                    {historyAndLegend.description && (
-                      <p className="text-lg text-muted-foreground leading-relaxed mb-4 whitespace-pre-line">
-                        {historyAndLegend.description}
-                      </p>
-                    )}
-                    {historyAndLegend.historicalFacts && (
-                      <div className="mb-4">
-                        <h4 className="font-semibold text-foreground mb-2 text-lg">Historical Facts</h4>
-                        <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                          {historyAndLegend.historicalFacts}
-                        </p>
-                      </div>
-                    )}
-                    {historyAndLegend.legends && (
-                      <div>
-                        <h4 className="font-semibold text-foreground mb-2 text-lg">Legends</h4>
-                        <p className="text-muted-foreground leading-relaxed italic whitespace-pre-line">
-                          {historyAndLegend.legends}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  {historyAndLegend.images && historyAndLegend.images.length > 0 && (
-                    <div className="space-y-6 mt-6">
-                      {historyAndLegend.images.map((img: any, i: number) => (
-                        <div key={i}>
-                          <img
-                            src={img.url}
-                            alt={img.caption || `History ${i + 1}`}
-                            className="w-full h-[400px] md:h-[500px] object-cover rounded-2xl"
-                          />
-                          {img.caption && (
-                            <p className="text-sm text-muted-foreground mt-2 text-center italic">
-                              {img.caption}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              )}
+                {/* Centered Description */}
+                <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line mb-10 text-center max-w-4xl mx-auto">
+                  {overview.description}
+                </p>
 
-              {/* SECTION 3: Where is Located (NEW) */}
-              {(whereIsLocated?.description || whereIsLocated?.city) && (
-                <section id="where-located" className="mb-20 scroll-mt-24">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 rounded-xl bg-primary/10">
-                      <MapPin className="w-6 h-6 text-primary" />
-                    </div>
-                    <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-                      Where is Located
-                    </h2>
-                  </div>
-                  {whereIsLocated.description && (
-                    <p className="text-lg text-muted-foreground leading-relaxed mb-6 whitespace-pre-line">
-                      {whereIsLocated.description}
-                    </p>
-                  )}
-                  <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-2xl p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {whereIsLocated.city && (
-                        <div className="p-4 bg-card rounded-xl">
-                          <div className="text-sm text-muted-foreground mb-1">City</div>
-                          <div className="font-semibold text-foreground">{whereIsLocated.city}</div>
-                        </div>
-                      )}
-                      {whereIsLocated.coordinates && (
-                        <div className="p-4 bg-card rounded-xl">
-                          <div className="text-sm text-muted-foreground mb-1">Coordinates</div>
-                          <div className="font-mono text-sm text-foreground">
-                            {whereIsLocated.coordinates.lat}, {whereIsLocated.coordinates.lng}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {whereIsLocated.images && whereIsLocated.images.length > 0 && (
-                    <div className="space-y-6 mt-6">
-                      {whereIsLocated.images.map((img: any, i: number) => (
-                        <div key={i}>
-                          <img
-                            src={img.url}
-                            alt={img.caption || `Location ${i + 1}`}
-                            className="w-full h-[400px] md:h-[500px] object-cover rounded-2xl"
-                          />
-                          {img.caption && (
-                            <p className="text-sm text-muted-foreground mt-2 text-center italic">
-                              {img.caption}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              )}
-
-              {/* SECTION 4: How to Go (NEW) */}
-              {howToGo?.methods && howToGo.methods.length > 0 && (
-                <section id="how-to-go" className="mb-20 scroll-mt-24">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 rounded-xl bg-secondary/10">
-                      <Car className="w-6 h-6 text-secondary" />
-                    </div>
-                    <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-                      How to Go
-                    </h2>
-                  </div>
-                  {howToGo.description && (
-                    <p className="text-muted-foreground mb-6 leading-relaxed whitespace-pre-line">
-                      {howToGo.description}
-                    </p>
-                  )}
-                  <div className="space-y-4">
-                    {howToGo.methods.map((method: any, i: number) => (
-                      <div key={i} className="bg-gradient-to-br from-muted/80 to-muted/40 rounded-2xl p-6 border border-border">
-                        <div className="flex items-start gap-4">
-                          <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
-                            <Car className="w-6 h-6 text-primary" />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-display text-xl font-semibold text-foreground mb-2">
-                              {method.title || `By ${method.type}`}
-                            </h4>
-                            {method.description && (
-                              <p className="text-muted-foreground mb-3">{method.description}</p>
-                            )}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                              {method.duration && (
-                                <div className="text-sm">
-                                  <div className="text-muted-foreground">Duration</div>
-                                  <div className="font-medium text-foreground">{method.duration}</div>
-                                </div>
-                              )}
-                              {method.distance && (
-                                <div className="text-sm">
-                                  <div className="text-muted-foreground">Distance</div>
-                                  <div className="font-medium text-foreground">{method.distance}</div>
-                                </div>
-                              )}
-                              {method.fare && (
-                                <div className="text-sm">
-                                  <div className="text-muted-foreground">Fare</div>
-                                  <div className="font-medium text-foreground">{method.fare}</div>
-                                </div>
-                              )}
-                            </div>
-                            {method.route && (
-                              <div className="text-sm mb-2">
-                                <span className="text-muted-foreground">Route: </span>
-                                <span className="text-foreground">{method.route}</span>
-                              </div>
-                            )}
-                            {method.tips && (
-                              <div className="text-sm bg-primary/5 rounded-lg p-3 mt-3">
-                                <span className="font-medium text-primary">💡 Tip: </span>
-                                <span className="text-muted-foreground">{method.tips}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                {/* Larger Centered Images */}
+                {overview.images && overview.images.length > 0 && (
+                  <div className="space-y-8">
+                    {overview.images.map((img: any, i: number) => (
+                      <div key={i} className="flex flex-col items-center">
+                        <img
+                          src={img.url}
+                          alt={img.caption || `Overview ${i + 1}`}
+                          className="w-full max-w-5xl h-[500px] md:h-[600px] lg:h-[700px] object-cover rounded-2xl"
+                        />
+                        {img.caption && (
+                          <p className="text-sm text-muted-foreground mt-4 text-center italic max-w-3xl">
+                            {img.caption}
+                          </p>
+                        )}
                       </div>
                     ))}
                   </div>
-                  {howToGo.images && howToGo.images.length > 0 && (
-                    <div className="space-y-6 mt-6">
-                      {howToGo.images.map((img: any, i: number) => (
-                        <div key={i}>
-                          <img
-                            src={img.url}
-                            alt={img.caption || `Transport ${i + 1}`}
-                            className="w-full h-[400px] md:h-[500px] object-cover rounded-2xl"
-                          />
-                          {img.caption && (
-                            <p className="text-sm text-muted-foreground mt-2 text-center italic">
-                              {img.caption}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              )}
+                )}
+              </section>
+            )}
 
-              {/* SECTION 5: What to See */}
-              {whatToSee?.highlights && whatToSee.highlights.length > 0 && (
-                <section id="what-to-see" className="mb-20 scroll-mt-24">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 rounded-xl bg-secondary/10">
-                      <Eye className="w-6 h-6 text-secondary" />
-                    </div>
-                    <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-                      What to See
-                    </h2>
+            {/* SECTION 2: History & Legend */}
+            {(historyAndLegend?.description || historyAndLegend?.historicalFacts || historyAndLegend?.legends) && (
+              <section id="history" className="mb-20 scroll-mt-24">
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  <div className="p-3 rounded-xl bg-accent/10">
+                    <ScrollText className="w-6 h-6 text-accent" />
                   </div>
-                  {whatToSee.description && (
-                    <p className="text-muted-foreground mb-6 leading-relaxed whitespace-pre-line">
-                      {whatToSee.description}
-                    </p>
-                  )}
-                  <div className="space-y-4 mb-6">
-                    {whatToSee.highlights.map((highlight: any, i: number) => {
-                      // Handle both string format (old data) and object format (new data)
-                      if (typeof highlight === 'string') {
-                        return (
-                          <div key={i} className="flex items-start gap-3 bg-gradient-to-br from-muted/80 to-muted/40 rounded-xl p-4">
-                            <CheckCircle className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
-                            <span className="text-foreground">{highlight}</span>
-                          </div>
-                        );
-                      } else {
-                        return (
-                          <div key={i} className="bg-gradient-to-br from-muted/80 to-muted/40 rounded-2xl p-6">
-                            <div className="flex items-start gap-4">
-                              {highlight.image && (
-                                <img 
-                                  src={highlight.image} 
-                                  alt={highlight.title}
-                                  className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
-                                />
-                              )}
-                              <div className="flex-1">
-                                <h4 className="font-display text-xl font-semibold text-foreground mb-2">
-                                  {highlight.title}
-                                </h4>
-                                <p className="text-muted-foreground text-base">
-                                  {highlight.description}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      }
-                    })}
-                  </div>
-                  {whatToSee.images && whatToSee.images.length > 0 && (
-                    <div className="space-y-6">
-                      {whatToSee.images.map((img: any, i: number) => (
-                        <div key={i}>
-                          <img
-                            src={img.url}
-                            alt={img.caption || `What to See ${i + 1}`}
-                            className="w-full h-[400px] md:h-[500px] object-cover rounded-2xl"
-                          />
-                          {img.caption && (
-                            <p className="text-sm text-muted-foreground mt-2 text-center italic">
-                              {img.caption}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              )}
+                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+                    History & Legend
+                  </h2>
+                </div>
 
-              {/* SECTION 6: Best Time to Visit (UPDATED - Multiple Seasons) */}
-              {bestTimeToVisit?.seasons && bestTimeToVisit.seasons.length > 0 && (
-                <section id="best-time" className="mb-20 scroll-mt-24">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 rounded-xl bg-secondary/10">
-                      <Calendar className="w-6 h-6 text-secondary" />
-                    </div>
-                    <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-                      Best Time to Visit
-                    </h2>
-                  </div>
-                  {bestTimeToVisit.description && (
+                {/* Centered Content Box */}
+                <div className="bg-gradient-to-br from-accent/5 to-transparent rounded-2xl p-8 md:p-10 border border-accent/10 max-w-4xl mx-auto">
+                  {historyAndLegend.description && (
                     <p className="text-lg text-muted-foreground leading-relaxed mb-6 whitespace-pre-line">
-                      {bestTimeToVisit.description}
+                      {historyAndLegend.description}
                     </p>
                   )}
-                  <div className="space-y-4">
-                    {bestTimeToVisit.seasons.map((season: any, i: number) => (
-                      <div 
-                        key={i} 
-                        className={`rounded-2xl p-6 border-2 ${
-                          season.recommended 
-                            ? 'bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/30' 
-                            : 'bg-muted/50 border-border'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between mb-4">
-                          <div>
-                            <h4 className="font-display text-2xl font-semibold text-foreground mb-1 flex items-center gap-2">
-                              {season.name}
-                              {season.recommended && <Star className="w-5 h-5 text-primary fill-primary" />}
-                            </h4>
-                            <p className="text-sm text-muted-foreground">{season.months}</p>
-                          </div>
-                        </div>
-                        
-                        {season.weather && (
-                          <p className="text-muted-foreground mb-4">{season.weather}</p>
+                  {historyAndLegend.historicalFacts && (
+                    <div className="mb-6">
+                      <h4 className="font-semibold text-foreground mb-2 text-lg">Historical Facts</h4>
+                      <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                        {historyAndLegend.historicalFacts}
+                      </p>
+                    </div>
+                  )}
+                  {historyAndLegend.legends && (
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-2 text-lg">Legends</h4>
+                      <p className="text-muted-foreground leading-relaxed italic whitespace-pre-line">
+                        {historyAndLegend.legends}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Images */}
+                {historyAndLegend.images && historyAndLegend.images.length > 0 && (
+                  <div className="space-y-8 mt-8">
+                    {historyAndLegend.images.map((img: any, i: number) => (
+                      <div key={i} className="flex flex-col items-center">
+                        <img
+                          src={img.url}
+                          alt={img.caption || `History ${i + 1}`}
+                          className="w-full max-w-5xl h-[500px] md:h-[600px] lg:h-[700px] object-cover rounded-2xl"
+                        />
+                        {img.caption && (
+                          <p className="text-sm text-muted-foreground mt-4 text-center italic max-w-3xl">
+                            {img.caption}
+                          </p>
                         )}
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {season.pros && season.pros.length > 0 && (
-                            <div className="bg-green-50 dark:bg-green-950/20 rounded-xl p-4">
-                              <div className="flex items-center gap-2 mb-3">
-                                <ThumbsUp className="w-5 h-5 text-green-600 dark:text-green-400" />
-                                <h5 className="font-semibold text-foreground">Advantages</h5>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* SECTION 3: Where is Located */}
+            {(whereIsLocated?.description || whereIsLocated?.city) && (
+              <section id="where-located" className="mb-20 scroll-mt-24">
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  <div className="p-3 rounded-xl bg-primary/10">
+                    <MapPin className="w-6 h-6 text-primary" />
+                  </div>
+                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+                    Where is Located
+                  </h2>
+                </div>
+
+                {whereIsLocated.description && (
+                  <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line mb-10 text-center max-w-4xl mx-auto">
+                    {whereIsLocated.description}
+                  </p>
+                )}
+
+                <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-2xl p-8 max-w-4xl mx-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {whereIsLocated.city && (
+                      <div className="p-4 bg-card rounded-xl">
+                        <div className="text-sm text-muted-foreground mb-1">City</div>
+                        <div className="font-semibold text-foreground">{whereIsLocated.city}</div>
+                      </div>
+                    )}
+                    {whereIsLocated.coordinates && (
+                      <div className="p-4 bg-card rounded-xl">
+                        <div className="text-sm text-muted-foreground mb-1">Coordinates</div>
+                        <div className="font-mono text-sm text-foreground">
+                          {whereIsLocated.coordinates.lat}, {whereIsLocated.coordinates.lng}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {whereIsLocated.images && whereIsLocated.images.length > 0 && (
+                  <div className="space-y-8 mt-8">
+                    {whereIsLocated.images.map((img: any, i: number) => (
+                      <div key={i} className="flex flex-col items-center">
+                        <img
+                          src={img.url}
+                          alt={img.caption || `Location ${i + 1}`}
+                          className="w-full max-w-5xl h-[500px] md:h-[600px] lg:h-[700px] object-cover rounded-2xl"
+                        />
+                        {img.caption && (
+                          <p className="text-sm text-muted-foreground mt-4 text-center italic max-w-3xl">
+                            {img.caption}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* SECTION 4: How to Go */}
+            {howToGo?.methods && howToGo.methods.length > 0 && (
+              <section id="how-to-go" className="mb-20 scroll-mt-24">
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  <div className="p-3 rounded-xl bg-secondary/10">
+                    <Car className="w-6 h-6 text-secondary" />
+                  </div>
+                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+                    How to Go
+                  </h2>
+                </div>
+
+                {howToGo.description && (
+                  <p className="text-muted-foreground mb-8 leading-relaxed whitespace-pre-line text-center max-w-4xl mx-auto">
+                    {howToGo.description}
+                  </p>
+                )}
+
+                <div className="space-y-4 max-w-4xl mx-auto">
+                  {howToGo.methods.map((method: any, i: number) => (
+                    <div key={i} className="bg-gradient-to-br from-muted/80 to-muted/40 rounded-2xl p-6 border border-border">
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 bg-primary/10 rounded-xl flex-shrink-0">
+                          <Car className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-display text-xl font-semibold text-foreground mb-2">
+                            {method.title || `By ${method.type}`}
+                          </h4>
+                          {method.description && (
+                            <p className="text-muted-foreground mb-3">{method.description}</p>
+                          )}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                            {method.duration && (
+                              <div className="text-sm">
+                                <div className="text-muted-foreground">Duration</div>
+                                <div className="font-medium text-foreground">{method.duration}</div>
                               </div>
-                              <ul className="space-y-2">
-                                {season.pros.map((pro: string, j: number) => (
-                                  <li key={j} className="text-sm text-muted-foreground flex items-start gap-2">
-                                    <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                                    <span>{pro}</span>
-                                  </li>
-                                ))}
-                              </ul>
+                            )}
+                            {method.distance && (
+                              <div className="text-sm">
+                                <div className="text-muted-foreground">Distance</div>
+                                <div className="font-medium text-foreground">{method.distance}</div>
+                              </div>
+                            )}
+                            {method.fare && (
+                              <div className="text-sm">
+                                <div className="text-muted-foreground">Fare</div>
+                                <div className="font-medium text-foreground">{method.fare}</div>
+                              </div>
+                            )}
+                          </div>
+                          {method.route && (
+                            <div className="text-sm mb-2">
+                              <span className="text-muted-foreground">Route: </span>
+                              <span className="text-foreground">{method.route}</span>
+                            </div>
+                          )}
+                          {method.tips && (
+                            <div className="text-sm bg-primary/5 rounded-lg p-3 mt-3">
+                              <span className="font-medium text-primary">💡 Tip: </span>
+                              <span className="text-muted-foreground">{method.tips}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {howToGo.images && howToGo.images.length > 0 && (
+                  <div className="space-y-8 mt-8">
+                    {howToGo.images.map((img: any, i: number) => (
+                      <div key={i} className="flex flex-col items-center">
+                        <img
+                          src={img.url}
+                          alt={img.caption || `Transport ${i + 1}`}
+                          className="w-full max-w-5xl h-[500px] md:h-[600px] lg:h-[700px] object-cover rounded-2xl"
+                        />
+                        {img.caption && (
+                          <p className="text-sm text-muted-foreground mt-4 text-center italic max-w-3xl">
+                            {img.caption}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* SECTION 5: What to See */}
+            {whatToSee?.highlights && whatToSee.highlights.length > 0 && (
+              <section id="what-to-see" className="mb-20 scroll-mt-24">
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  <div className="p-3 rounded-xl bg-secondary/10">
+                    <Eye className="w-6 h-6 text-secondary" />
+                  </div>
+                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+                    What to See
+                  </h2>
+                </div>
+
+                {whatToSee.description && (
+                  <p className="text-muted-foreground mb-8 leading-relaxed whitespace-pre-line text-center max-w-4xl mx-auto">
+                    {whatToSee.description}
+                  </p>
+                )}
+
+                {/* Centered List */}
+                <div className="space-y-8 mb-8 max-w-4xl mx-auto">
+                  {whatToSee.highlights.map((highlight: any, i: number) => {
+                    if (typeof highlight === 'string') {
+                      return (
+                        <div key={i} className="flex items-start gap-3 bg-gradient-to-br from-muted/80 to-muted/40 rounded-xl p-5">
+                          <CheckCircle className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
+                          <span className="text-foreground">{highlight}</span>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div key={i} className="bg-gradient-to-br from-muted/80 to-muted/40 rounded-2xl p-8">
+                          {/* Title First */}
+                          <h4 className="font-display text-2xl font-semibold text-foreground mb-6 text-center">
+                            {highlight.title}
+                          </h4>
+                          
+                          {/* Large Image Second */}
+                          {highlight.image && (
+                            <div className="mb-6">
+                              <img 
+                                src={highlight.image} 
+                                alt={highlight.title}
+                                className="w-full h-[300px] md:h-[400px] rounded-xl object-cover"
+                              />
                             </div>
                           )}
                           
-                          {season.cons && season.cons.length > 0 && (
-                            <div className="bg-orange-50 dark:bg-orange-950/20 rounded-xl p-4">
-                              <div className="flex items-center gap-2 mb-3">
-                                <ThumbsDown className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                                <h5 className="font-semibold text-foreground">Disadvantages</h5>
-                              </div>
-                              <ul className="space-y-2">
-                                {season.cons.map((con: string, j: number) => (
-                                  <li key={j} className="text-sm text-muted-foreground flex items-start gap-2">
-                                    <span className="w-4 h-4 flex items-center justify-center text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0">×</span>
-                                    <span>{con}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  {bestTimeToVisit.images && bestTimeToVisit.images.length > 0 && (
-                    <div className="space-y-6 mt-6">
-                      {bestTimeToVisit.images.map((img: any, i: number) => (
-                        <div key={i}>
-                          <img
-                            src={img.url}
-                            alt={img.caption || `Season ${i + 1}`}
-                            className="w-full h-[400px] md:h-[500px] object-cover rounded-2xl"
-                          />
-                          {img.caption && (
-                            <p className="text-sm text-muted-foreground mt-2 text-center italic">
-                              {img.caption}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              )}
-
-              {/* SECTION 7: Things to Do */}
-              {thingsToDo?.activities && thingsToDo.activities.length > 0 && (
-                <section id="things-to-do" className="mb-20 scroll-mt-24">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 rounded-xl bg-accent/10">
-                      <Mountain className="w-6 h-6 text-accent" />
-                    </div>
-                    <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-                      Things to Do
-                    </h2>
-                  </div>
-                  {thingsToDo.description && (
-                    <p className="text-muted-foreground mb-6 leading-relaxed whitespace-pre-line">
-                      {thingsToDo.description}
-                    </p>
-                  )}
-                  <div className="space-y-4 mb-6">
-                    {thingsToDo.activities.map((activity: any, i: number) => {
-                      // Handle both string format (old data) and object format (new data)
-                      if (typeof activity === 'string') {
-                        return (
-                          <div key={i} className="flex items-start gap-3 bg-gradient-to-br from-muted/80 to-muted/40 rounded-xl p-4">
-                            <Mountain className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-                            <span className="text-foreground">{activity}</span>
-                          </div>
-                        );
-                      } else {
-                        return (
-                          <div key={i} className="bg-gradient-to-br from-muted/80 to-muted/40 rounded-2xl p-6">
-                            <div className="flex items-start gap-4">
-                              {activity.image && (
-                                <img 
-                                  src={activity.image} 
-                                  alt={activity.title}
-                                  className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
-                                />
-                              )}
-                              <div className="flex-1">
-                                <h4 className="font-display text-xl font-semibold text-foreground mb-2">
-                                  {activity.title}
-                                </h4>
-                                <p className="text-muted-foreground text-base">
-                                  {activity.description}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      }
-                    })}
-                  </div>
-                  {thingsToDo.images && thingsToDo.images.length > 0 && (
-                    <div className="space-y-6">
-                      {thingsToDo.images.map((img: any, i: number) => (
-                        <div key={i}>
-                          <img
-                            src={img.url}
-                            alt={img.caption || `Activity ${i + 1}`}
-                            className="w-full h-[400px] md:h-[500px] object-cover rounded-2xl"
-                          />
-                          {img.caption && (
-                            <p className="text-sm text-muted-foreground mt-2 text-center italic">
-                              {img.caption}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              )}
-
-              {/* SECTION 8: Where to Stay (NEW - with populated hotels) */}
-              {whereToStay?.hotelsDetails && whereToStay.hotelsDetails.length > 0 && (
-                <section id="where-to-stay" className="mb-20 scroll-mt-24">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 rounded-xl bg-primary/10">
-                      <HotelIcon className="w-6 h-6 text-primary" />
-                    </div>
-                    <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-                      Where to Stay
-                    </h2>
-                  </div>
-                  {whereToStay.description && (
-                    <p className="text-muted-foreground mb-6 leading-relaxed whitespace-pre-line">
-                      {whereToStay.description}
-                    </p>
-                  )}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {whereToStay.hotelsDetails.map((hotel: any) => (
-                      <div
-                        key={hotel.id}
-                        onClick={() => navigate(`/stay-eat/hotels/${hotel.id}`)}
-                        className="group cursor-pointer bg-card rounded-2xl overflow-hidden border border-border hover:border-primary transition-all duration-300 hover:shadow-lg"
-                      >
-                        <div className="relative h-56 overflow-hidden">
-                          <img
-                            src={hotel.heroImage}
-                            alt={hotel.name}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                          <div className="absolute top-3 right-3 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
-                            {hotel.distance} {hotel.unit}
-                          </div>
-                        </div>
-                        <div className="p-5">
-                          <h3 className="font-display text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
-                            {hotel.name}
-                          </h3>
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-sm text-muted-foreground capitalize">{hotel.category}</span>
-                            {hotel.rating > 0 && (
-                              <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                                <span className="text-sm font-medium">{hotel.rating}</span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="text-primary font-semibold mb-3">
-                            {hotel.currency} {hotel.price}
-                          </div>
-                          <button className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
-                            View Details
-                            <ArrowLeft className="w-4 h-4 rotate-180" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* SECTION 9: Where to Eat (NEW - with populated restaurants) */}
-              {whereToEat?.restaurantsDetails && whereToEat.restaurantsDetails.length > 0 && (
-                <section id="where-to-eat" className="mb-20 scroll-mt-24">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 rounded-xl bg-secondary/10">
-                      <UtensilsCrossed className="w-6 h-6 text-secondary" />
-                    </div>
-                    <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-                      Where to Eat
-                    </h2>
-                  </div>
-                  {whereToEat.description && (
-                    <p className="text-muted-foreground mb-6 leading-relaxed whitespace-pre-line">
-                      {whereToEat.description}
-                    </p>
-                  )}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {whereToEat.restaurantsDetails.map((restaurant: any) => (
-                      <div
-                        key={restaurant.id}
-                        onClick={() => navigate(`/stay-eat/restaurants/${restaurant.id}`)}
-                        className="group cursor-pointer bg-card rounded-2xl overflow-hidden border border-border hover:border-primary transition-all duration-300 hover:shadow-lg"
-                      >
-                        <div className="relative h-56 overflow-hidden">
-                          <img
-                            src={restaurant.heroImage}
-                            alt={restaurant.name}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                          <div className="absolute top-3 right-3 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
-                            {restaurant.distance} {restaurant.unit}
-                          </div>
-                        </div>
-                        <div className="p-5">
-                          <h3 className="font-display text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
-                            {restaurant.name}
-                          </h3>
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-sm text-muted-foreground">{restaurant.cuisine}</span>
-                            {restaurant.rating > 0 && (
-                              <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                                <span className="text-sm font-medium">{restaurant.rating}</span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="text-primary font-semibold mb-3">
-                            {restaurant.priceRange}
-                          </div>
-                          <button className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
-                            View Details
-                            <ArrowLeft className="w-4 h-4 rotate-180" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* SECTION 10: Travel Tips */}
-              {travelTips?.tips && travelTips.tips.length > 0 && (
-                <section id="travel-tips" className="mb-20 scroll-mt-24">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 rounded-xl bg-primary/10">
-                      <Lightbulb className="w-6 h-6 text-primary" />
-                    </div>
-                    <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-                      Travel Tips
-                    </h2>
-                  </div>
-                  {travelTips.description && (
-                    <p className="text-muted-foreground mb-6 leading-relaxed whitespace-pre-line">
-                      {travelTips.description}
-                    </p>
-                  )}
-                  <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-2xl p-6 md:p-8">
-                    <ul className="space-y-4">
-                      {travelTips.tips.map((tip: string, i: number) => (
-                        <li key={i} className="flex items-start gap-3">
-                          <CheckCircle className="w-6 h-6 text-secondary mt-0.5 flex-shrink-0" />
-                          <span className="text-muted-foreground text-base">{tip}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  {travelTips.images && travelTips.images.length > 0 && (
-                    <div className="space-y-6 mt-6">
-                      {travelTips.images.map((img: any, i: number) => (
-                        <div key={i}>
-                          <img
-                            src={img.url}
-                            alt={img.caption || `Tip ${i + 1}`}
-                            className="w-full h-[400px] md:h-[500px] object-cover rounded-2xl"
-                          />
-                          {img.caption && (
-                            <p className="text-sm text-muted-foreground mt-2 text-center italic">
-                              {img.caption}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              )}
-
-              {/* SECTION 11: Nearby Destinations (NEW) */}
-              {nearbyDestinations?.destinationsDetails && nearbyDestinations.destinationsDetails.length > 0 && (
-                <section id="nearby-destinations" className="mb-20 scroll-mt-24">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 rounded-xl bg-accent/10">
-                      <Compass className="w-6 h-6 text-accent" />
-                    </div>
-                    <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-                      Nearby Destinations
-                    </h2>
-                  </div>
-                  {nearbyDestinations.description && (
-                    <p className="text-muted-foreground mb-6 leading-relaxed whitespace-pre-line">
-                      {nearbyDestinations.description}
-                    </p>
-                  )}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {nearbyDestinations.destinationsDetails.map((dest: any) => (
-                      <div
-                        key={dest.id}
-                        onClick={() => navigate(`/destinations/${dest.id}`)}
-                        className="group cursor-pointer bg-card rounded-2xl overflow-hidden border border-border hover:border-primary transition-all duration-300 hover:shadow-lg"
-                      >
-                        <div className="relative h-56 overflow-hidden">
-                          <img
-                            src={dest.heroImage}
-                            alt={dest.name}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                          <div className="absolute top-3 left-3 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium capitalize">
-                            {dest.category}
-                          </div>
-                          <div className="absolute top-3 right-3 bg-black/60 text-white px-3 py-1 rounded-full text-sm font-medium">
-                            {dest.distance} {dest.unit}
-                          </div>
-                        </div>
-                        <div className="p-5">
-                          <h3 className="font-display text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
-                            {dest.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-3 flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            {dest.region}
+                          {/* Description Third */}
+                          <p className="text-muted-foreground text-base leading-relaxed">
+                            {highlight.description}
                           </p>
-                          <button className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
-                            Explore Destination
-                            <ArrowLeft className="w-4 h-4 rotate-180" />
-                          </button>
                         </div>
+                      );
+                    }
+                  })}
+                </div>
+
+                {/* Images */}
+                {whatToSee.images && whatToSee.images.length > 0 && (
+                  <div className="space-y-8">
+                    {whatToSee.images.map((img: any, i: number) => (
+                      <div key={i} className="flex flex-col items-center">
+                        <img
+                          src={img.url}
+                          alt={img.caption || `What to See ${i + 1}`}
+                          className="w-full max-w-5xl h-[500px] md:h-[600px] lg:h-[700px] object-cover rounded-2xl"
+                        />
+                        {img.caption && (
+                          <p className="text-sm text-muted-foreground mt-4 text-center italic max-w-3xl">
+                            {img.caption}
+                          </p>
+                        )}
                       </div>
                     ))}
                   </div>
-                </section>
-              )}
-            </div>
+                )}
+              </section>
+            )}
+
+            {/* SECTION 6: Best Time to Visit */}
+            {bestTimeToVisit?.seasons && bestTimeToVisit.seasons.length > 0 && (
+              <section id="best-time" className="mb-20 scroll-mt-24">
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  <div className="p-3 rounded-xl bg-secondary/10">
+                    <Calendar className="w-6 h-6 text-secondary" />
+                  </div>
+                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+                    Best Time to Visit
+                  </h2>
+                </div>
+
+                {bestTimeToVisit.description && (
+                  <p className="text-lg text-muted-foreground leading-relaxed mb-8 whitespace-pre-line text-center max-w-4xl mx-auto">
+                    {bestTimeToVisit.description}
+                  </p>
+                )}
+
+                <div className="space-y-4 max-w-4xl mx-auto">
+                  {bestTimeToVisit.seasons.map((season: any, i: number) => (
+                    <div 
+                      key={i} 
+                      className={`rounded-2xl p-6 border-2 ${
+                        season.recommended 
+                          ? 'bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/30' 
+                          : 'bg-muted/50 border-border'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h4 className="font-display text-2xl font-semibold text-foreground mb-1 flex items-center gap-2">
+                            {season.name}
+                            {season.recommended && <Star className="w-5 h-5 text-primary fill-primary" />}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">{season.months}</p>
+                        </div>
+                      </div>
+                      
+                      {season.weather && (
+                        <p className="text-muted-foreground mb-4">{season.weather}</p>
+                      )}
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {season.pros && season.pros.length > 0 && (
+                          <div className="bg-green-50 dark:bg-green-950/20 rounded-xl p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                              <ThumbsUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+                              <h5 className="font-semibold text-foreground">Advantages</h5>
+                            </div>
+                            <ul className="space-y-2">
+                              {season.pros.map((pro: string, j: number) => (
+                                <li key={j} className="text-sm text-muted-foreground flex items-start gap-2">
+                                  <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                                  <span>{pro}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        {season.cons && season.cons.length > 0 && (
+                          <div className="bg-orange-50 dark:bg-orange-950/20 rounded-xl p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                              <ThumbsDown className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                              <h5 className="font-semibold text-foreground">Disadvantages</h5>
+                            </div>
+                            <ul className="space-y-2">
+                              {season.cons.map((con: string, j: number) => (
+                                <li key={j} className="text-sm text-muted-foreground flex items-start gap-2">
+                                  <span className="w-4 h-4 flex items-center justify-center text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0">×</span>
+                                  <span>{con}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {bestTimeToVisit.images && bestTimeToVisit.images.length > 0 && (
+                  <div className="space-y-8 mt-8">
+                    {bestTimeToVisit.images.map((img: any, i: number) => (
+                      <div key={i} className="flex flex-col items-center">
+                        <img
+                          src={img.url}
+                          alt={img.caption || `Season ${i + 1}`}
+                          className="w-full max-w-5xl h-[500px] md:h-[600px] lg:h-[700px] object-cover rounded-2xl"
+                        />
+                        {img.caption && (
+                          <p className="text-sm text-muted-foreground mt-4 text-center italic max-w-3xl">
+                            {img.caption}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* SECTION 7: Things to Do */}
+            {thingsToDo?.activities && thingsToDo.activities.length > 0 && (
+              <section id="things-to-do" className="mb-20 scroll-mt-24">
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  <div className="p-3 rounded-xl bg-accent/10">
+                    <Mountain className="w-6 h-6 text-accent" />
+                  </div>
+                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+                    Things to Do
+                  </h2>
+                </div>
+
+                {thingsToDo.description && (
+                  <p className="text-muted-foreground mb-8 leading-relaxed whitespace-pre-line text-center max-w-4xl mx-auto">
+                    {thingsToDo.description}
+                  </p>
+                )}
+
+                <div className="space-y-8 mb-8 max-w-4xl mx-auto">
+                  {thingsToDo.activities.map((activity: any, i: number) => {
+                    if (typeof activity === 'string') {
+                      return (
+                        <div key={i} className="flex items-start gap-3 bg-gradient-to-br from-muted/80 to-muted/40 rounded-xl p-5">
+                          <Mountain className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+                          <span className="text-foreground">{activity}</span>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div key={i} className="bg-gradient-to-br from-muted/80 to-muted/40 rounded-2xl p-8">
+                          {/* Title First */}
+                          <h4 className="font-display text-2xl font-semibold text-foreground mb-6 text-center">
+                            {activity.title}
+                          </h4>
+                          
+                          {/* Large Image Second */}
+                          {activity.image && (
+                            <div className="mb-6">
+                              <img 
+                                src={activity.image} 
+                                alt={activity.title}
+                                className="w-full h-[300px] md:h-[400px] rounded-xl object-cover"
+                              />
+                            </div>
+                          )}
+                          
+                          {/* Description Third */}
+                          <p className="text-muted-foreground text-base leading-relaxed">
+                            {activity.description}
+                          </p>
+                        </div>
+                      );
+                    }
+                  })}
+                </div>
+
+                {thingsToDo.images && thingsToDo.images.length > 0 && (
+                  <div className="space-y-8">
+                    {thingsToDo.images.map((img: any, i: number) => (
+                      <div key={i} className="flex flex-col items-center">
+                        <img
+                          src={img.url}
+                          alt={img.caption || `Activity ${i + 1}`}
+                          className="w-full max-w-5xl h-[500px] md:h-[600px] lg:h-[700px] object-cover rounded-2xl"
+                        />
+                        {img.caption && (
+                          <p className="text-sm text-muted-foreground mt-4 text-center italic max-w-3xl">
+                            {img.caption}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* SECTION 10: Travel Tips */}
+            {travelTips?.tips && travelTips.tips.length > 0 && (
+              <section id="travel-tips" className="mb-20 scroll-mt-24">
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  <div className="p-3 rounded-xl bg-primary/10">
+                    <Lightbulb className="w-6 h-6 text-primary" />
+                  </div>
+                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+                    Travel Tips
+                  </h2>
+                </div>
+
+                {travelTips.description && (
+                  <p className="text-muted-foreground mb-8 leading-relaxed whitespace-pre-line text-center max-w-4xl mx-auto">
+                    {travelTips.description}
+                  </p>
+                )}
+
+                <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-2xl p-8 md:p-10 max-w-4xl mx-auto">
+                  <ul className="space-y-4">
+                    {travelTips.tips.map((tip: string, i: number) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <CheckCircle className="w-6 h-6 text-secondary mt-0.5 flex-shrink-0" />
+                        <span className="text-muted-foreground text-base">{tip}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {travelTips.images && travelTips.images.length > 0 && (
+                  <div className="space-y-8 mt-8">
+                    {travelTips.images.map((img: any, i: number) => (
+                      <div key={i} className="flex flex-col items-center">
+                        <img
+                          src={img.url}
+                          alt={img.caption || `Tip ${i + 1}`}
+                          className="w-full max-w-5xl h-[500px] md:h-[600px] lg:h-[700px] object-cover rounded-2xl"
+                        />
+                        {img.caption && (
+                          <p className="text-sm text-muted-foreground mt-4 text-center italic max-w-3xl">
+                            {img.caption}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* SECTION 8: Where to Stay */}
+            {whereToStay?.hotelsDetails && whereToStay.hotelsDetails.length > 0 && (
+              <section id="where-to-stay" className="mb-20 scroll-mt-24">
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  <div className="p-3 rounded-xl bg-primary/10">
+                    <HotelIcon className="w-6 h-6 text-primary" />
+                  </div>
+                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+                    Where to Stay
+                  </h2>
+                </div>
+
+                {whereToStay.description && (
+                  <p className="text-muted-foreground mb-8 leading-relaxed whitespace-pre-line text-center max-w-4xl mx-auto">
+                    {whereToStay.description}
+                  </p>
+                )}
+
+                {/* Centered Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                  {whereToStay.hotelsDetails.map((hotel: any) => (
+                    <div
+                      key={hotel.id}
+                      onClick={() => navigate(`/stay-eat/hotels/${hotel.id}`)}
+                      className="group cursor-pointer bg-card rounded-2xl overflow-hidden border border-border hover:border-primary transition-all duration-300 hover:shadow-lg"
+                    >
+                      <div className="relative h-56 overflow-hidden">
+                        <img
+                          src={hotel.heroImage}
+                          alt={hotel.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                        <div className="absolute top-3 right-3 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
+                          {hotel.distance} {hotel.unit}
+                        </div>
+                      </div>
+                      <div className="p-5">
+                        <h3 className="font-display text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
+                          {hotel.name}
+                        </h3>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm text-muted-foreground capitalize">{hotel.category}</span>
+                          {hotel.rating > 0 && (
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                              <span className="text-sm font-medium">{hotel.rating}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-primary font-semibold mb-3">
+                          {hotel.currency} {hotel.price}
+                        </div>
+                        <button className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
+                          View Details
+                          <ArrowLeft className="w-4 h-4 rotate-180" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* SECTION 9: Where to Eat */}
+            {whereToEat?.restaurantsDetails && whereToEat.restaurantsDetails.length > 0 && (
+              <section id="where-to-eat" className="mb-20 scroll-mt-24">
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  <div className="p-3 rounded-xl bg-secondary/10">
+                    <UtensilsCrossed className="w-6 h-6 text-secondary" />
+                  </div>
+                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+                    Where to Eat
+                  </h2>
+                </div>
+
+                {whereToEat.description && (
+                  <p className="text-muted-foreground mb-8 leading-relaxed whitespace-pre-line text-center max-w-4xl mx-auto">
+                    {whereToEat.description}
+                  </p>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                  {whereToEat.restaurantsDetails.map((restaurant: any) => (
+                    <div
+                      key={restaurant.id}
+                      onClick={() => navigate(`/stay-eat/restaurants/${restaurant.id}`)}
+                      className="group cursor-pointer bg-card rounded-2xl overflow-hidden border border-border hover:border-primary transition-all duration-300 hover:shadow-lg"
+                    >
+                      <div className="relative h-56 overflow-hidden">
+                        <img
+                          src={restaurant.heroImage}
+                          alt={restaurant.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                        <div className="absolute top-3 right-3 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
+                          {restaurant.distance} {restaurant.unit}
+                        </div>
+                      </div>
+                      <div className="p-5">
+                        <h3 className="font-display text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
+                          {restaurant.name}
+                        </h3>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm text-muted-foreground">{restaurant.cuisine}</span>
+                          {restaurant.rating > 0 && (
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                              <span className="text-sm font-medium">{restaurant.rating}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-primary font-semibold mb-3">
+                          {restaurant.priceRange}
+                        </div>
+                        <button className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
+                          View Details
+                          <ArrowLeft className="w-4 h-4 rotate-180" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            
+
+            {/* SECTION 11: Nearby Destinations */}
+            {nearbyDestinations?.destinationsDetails && nearbyDestinations.destinationsDetails.length > 0 && (
+              <section id="nearby-destinations" className="mb-20 scroll-mt-24">
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  <div className="p-3 rounded-xl bg-accent/10">
+                    <Compass className="w-6 h-6 text-accent" />
+                  </div>
+                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+                    Nearby Destinations
+                  </h2>
+                </div>
+
+                {nearbyDestinations.description && (
+                  <p className="text-muted-foreground mb-8 leading-relaxed whitespace-pre-line text-center max-w-4xl mx-auto">
+                    {nearbyDestinations.description}
+                  </p>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                  {nearbyDestinations.destinationsDetails.map((dest: any) => (
+                    <div
+                      key={dest.id}
+                      onClick={() => navigate(`/destinations/${dest.id}`)}
+                      className="group cursor-pointer bg-card rounded-2xl overflow-hidden border border-border hover:border-primary transition-all duration-300 hover:shadow-lg"
+                    >
+                      <div className="relative h-56 overflow-hidden">
+                        <img
+                          src={dest.heroImage}
+                          alt={dest.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                        <div className="absolute top-3 left-3 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium capitalize">
+                          {dest.category}
+                        </div>
+                        <div className="absolute top-3 right-3 bg-black/60 text-white px-3 py-1 rounded-full text-sm font-medium">
+                          {dest.distance} {dest.unit}
+                        </div>
+                      </div>
+                      <div className="p-5">
+                        <h3 className="font-display text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
+                          {dest.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-3 flex items-center gap-1">
+                          <MapPin className="w-4 h-4" />
+                          {dest.region}
+                        </p>
+                        <button className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
+                          Explore Destination
+                          <ArrowLeft className="w-4 h-4 rotate-180" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         </div>
       </div>
