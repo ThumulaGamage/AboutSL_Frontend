@@ -1,73 +1,120 @@
-# Welcome to your Lovable project
+# 🌴 AboutSL – Explore Sri Lanka
 
-## Project info
+**Live Website:** http://www.AboutSL.viukon.com  
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+AboutSL is a tourism-focused web application designed to help travelers explore the beauty of Sri Lanka. The platform provides destination blogs, nearby hotel recommendations, and restaurant suggestions to make travel planning easier and more enjoyable.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 📌 Project Overview
 
-**Use Lovable**
+AboutSL is a user-friendly tourism website that:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- 🏝️ Showcases popular destinations in Sri Lanka  
+- 📝 Provides detailed travel blogs about each location  
+- 🏨 Suggests nearby hotels for accommodation  
+- 🍽️ Recommends restaurants near tourist destinations  
+- 🌍 Is fully deployed and accessible online  
 
-Changes made via Lovable will be committed automatically to this repo.
+This platform is especially useful for:
 
-**Use your preferred IDE**
+- International tourists  
+- Local travelers  
+- Travel planners  
+- Travel bloggers  
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🚀 Live Deployment
 
-Follow these steps:
+The project is successfully deployed and accessible at:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+👉 http://www.AboutSL.viukon.com  
+
+---
+
+## 🛠️ Technologies Used
+
+This project is built with modern web technologies:
+
+- ⚡ Vite  
+- 🟦 TypeScript  
+- ⚛️ React  
+- 🎨 Tailwind CSS  
+- 🧩 shadcn-ui  
+
+---
+
+## 💻 Installation & Setup (Run Locally)
+
+Make sure you have **Node.js** and **npm** installed.
+
+### 1️⃣ Clone the repository
+
+```bash
 git clone <YOUR_GIT_URL>
+```
 
-# Step 2: Navigate to the project directory.
+### 2️⃣ Navigate to the project directory
+
+```bash
 cd <YOUR_PROJECT_NAME>
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+### 3️⃣ Install dependencies
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
+```
+
+### 4️⃣ Start development server
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will start with auto-reloading and provide a local development preview.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## ✨ Key Features
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- Responsive and modern user interface  
+- Clean and simple navigation  
+- Destination-based blog content  
+- Nearby hotel recommendations  
+- Restaurant suggestions  
+- Fully deployed production version  
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+## 🎯 Purpose of the Project
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The main goal of AboutSL is to promote tourism in Sri Lanka by providing:
 
-## How can I deploy this project?
+- Reliable travel information  
+- Easy access to accommodation options  
+- Restaurant recommendations  
+- A smooth and informative browsing experience  
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## 🔮 Future Improvements
 
-Yes, you can!
+- User authentication system  
+- User reviews & ratings  
+- Booking integration  
+- Interactive maps  
+- Admin dashboard for managing blogs and destinations  
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 👨‍💻 Developed By
+
+**Thumula Gamage**
+
+---
+
+## 📄 License
+
+This project is developed for educational and portfolio purposes.
